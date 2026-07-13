@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Penarikan Dana - BAKOEL</title>
+
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.onrender.com; img-src 'self' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com;">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        .soft-shadow { box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.03), -4px -4px 10px rgba(255, 255, 255, 1); }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 3000; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content { background: #f8fafc; width: 90%; max-width: 420px; border-radius: 25px; padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(30px); transition: transform 0.3s ease; text-align: center; position: relative; overflow: hidden; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-label { display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 8px; margin-left: 10px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .neu-input { width: 100%; padding: 12px 20px; border-radius: 15px; border: 1px solid #e2e8f0; background: #fff; color: #1e293b; outline: none; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+        .neu-input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+        .neu-input:disabled { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; border-color: #e2e8f0; }
+        
+        .pin-input { text-align: center; letter-spacing: 0.8em; font-size: 24px; font-weight: 900; font-family: monospace; color: #1e293b; padding: 15px; background: #f1f5f9; border: 2px solid #cbd5e1; border-radius: 15px; outline: none; transition: all 0.3s; width: 100%; }
+        .pin-input:focus { border-color: #3b82f6; background: #fff; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1); }
+        .pin-input::placeholder { font-size: 14px; letter-spacing: normal; font-weight: normal; color: #94a3b8; }
+
+        .neu-btn { padding: 12px 20px; border-radius: 15px; border: none; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .neu-btn-success { background: #10b981; color: #fff; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
+        .neu-btn-success:hover:not(:disabled) { background: #059669; }
+        .neu-btn-success:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; }
+        .neu-btn-primary { background: #3b82f6; color: #fff; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.2); }
+        .neu-btn-primary:hover { background: #2563eb; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .tab-btn { transition: all 0.3s ease; }
+        .tab-btn.active { background-color: #3b82f6; color: white; border-color: #3b82f6; }
+        .tab-btn.inactive { background-color: white; color: #64748b; border-color: #e2e8f0; }
+        .tab-content { display: none; animation: fadeIn 0.3s ease; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .account-card { border: 2px solid #e2e8f0; border-radius: 15px; padding: 15px; cursor: pointer; transition: all 0.2s; position: relative; background: #fff; display: flex; align-items: center; gap: 15px; margin-bottom: 10px; }
+        .account-card:hover { border-color: #cbd5e1; background: #f8fafc; }
+        .account-card.selected { border-color: #10b981; background: #ecfdf5; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.1); }
+        .account-card.selected::after { content: '\f058'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; right: 15px; color: #10b981; font-size: 20px; }
+    </style>
+</head>
+<body class="bg-slate-50 flex font-sans antialiased text-slate-800 h-screen overflow-hidden">
+
+    <aside class="w-64 bg-white border-r border-gray-200 h-screen flex flex-col z-20 hidden md:flex flex-shrink-0">
+        <div class="p-6 border-b border-gray-100 flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+            <h2 class="text-xl font-extrabold text-blue-600 tracking-wide">BAKOEL</h2>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="index.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+            </a>
+            <a href="katalog.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-list w-5"></i> Katalog Produk
+            </a>
+            <a href="tambah.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-plus-circle w-5"></i> Tambah Produk
+            </a>
+            
+            <a href="lokasi.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-map-location-dot w-5"></i> Alamat Penjemputan
+            </a>
+
+            <a href="penarikan.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-money-bill-transfer w-5"></i> Penarikan Dana
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-100 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors" onclick="logoutAdmin()">
+            <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-500 shadow-sm border border-rose-200">
+                <i class="fa-solid fa-power-off"></i>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-slate-700">Logout</p>
+                <p class="text-xs text-slate-400">Tutup Sesi Admin</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto custom-scrollbar relative">
+        <div class="max-w-6xl mx-auto space-y-6">
+            
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Keuangan & Penarikan</h1>
+                <p class="text-sm text-slate-500 mt-1">Pantau saldo pendapatan, pesanan dalam pengiriman, dan riwayat mutasi Anda.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-3xl p-6 text-white shadow-lg shadow-emerald-500/30 relative overflow-hidden">
+                    <div class="absolute -right-6 -top-6 text-emerald-400 opacity-20 text-9xl"><i class="fa-solid fa-wallet"></i></div>
+                    <div class="relative z-10">
+                        <p class="text-emerald-100 text-sm font-bold tracking-wider uppercase mb-1">Saldo Dapat Ditarik</p>
+                        <h2 class="text-4xl font-extrabold mb-2" id="uiAvailableBalance">Rp 0</h2>
+                        <p class="text-xs text-emerald-50 bg-black/10 inline-block px-3 py-1 rounded-full"><i class="fa-solid fa-check-circle mr-1"></i> Berasal dari pesanan Selesai</p>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl p-6 border border-gray-200 soft-shadow relative overflow-hidden flex flex-col justify-center">
+                    <div class="flex items-start justify-between relative z-10">
+                        <div>
+                            <p class="text-slate-500 text-sm font-bold tracking-wider uppercase mb-1">Dana Dalam Perjalanan</p>
+                            <h2 class="text-3xl font-extrabold text-amber-500 mb-2" id="uiPendingBalance">Rp 0</h2>
+                            <p class="text-xs text-slate-400"><i class="fa-solid fa-truck-fast text-amber-500 mr-1"></i> Pesanan sedang dikirim ke pembeli</p>
+                        </div>
+                        <div class="w-14 h-14 bg-amber-50 rounded-2xl flex items-center justify-center text-amber-500 text-2xl shadow-inner border border-amber-100">
+                            <i class="fa-solid fa-boxes-packing"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <div class="lg:col-span-1">
+                    <div class="bg-white rounded-2xl p-6 border border-gray-100 soft-shadow h-full">
+                        <h3 class="text-lg font-bold text-slate-800 mb-4 border-b border-gray-100 pb-3"><i class="fa-solid fa-building-columns text-emerald-500 mr-2"></i> Tarik Dana</h3>
+                        
+                        <div class="mb-5">
+                            <span class="input-label flex justify-between items-center mb-2">
+                                Tujuan Pencairan
+                                <button id="btnAddAccountBtn" onclick="openAddAccountModal()" class="text-blue-500 hover:text-blue-700 text-[10px] hidden"><i class="fas fa-plus"></i> Tambah (Maks 2)</button>
+                            </span>
+                            
+                            <div id="accountsListContainer" class="space-y-2">
+                                <div class="text-center p-4">
+                                    <i class="fas fa-spinner fa-spin text-blue-300 text-2xl mb-2"></i>
+                                    <p class="text-xs text-slate-500">Menyinkronkan Rekening Server...</p>
+                                </div>
+                            </div>
+                            <input type="hidden" id="selectedAccountIndex" value="-1">
+                        </div>
+
+                        <div class="input-group mb-6">
+                            <span class="input-label flex justify-between">
+                                <span>Nominal Penarikan (Rp)</span>
+                                <button onclick="pullMaxBalance()" class="text-blue-500 hover:text-blue-700 font-bold text-[10px]">Tarik Semua</button>
+                            </span>
+                            <div class="relative">
+                                <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-slate-400 font-bold">Rp</span>
+                                <input type="number" id="withdrawAmount" class="neu-input pl-10" placeholder="Min. 10000" min="10000" onkeyup="validateWithdrawal()">
+                            </div>
+                            <p id="withdrawWarn" class="text-[10px] text-rose-500 mt-2 font-bold hidden"><i class="fa-solid fa-triangle-exclamation"></i> Cek nominal / Pilih rekening tujuan!</p>
+                        </div>
+
+                        <button id="btnWithdraw" class="neu-btn neu-btn-success w-full py-3" onclick="triggerPinModal()" disabled>
+                            <i class="fa-solid fa-shield-halved"></i> Verifikasi PIN & Tarik
+                        </button>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2">
+                    <div class="bg-white rounded-2xl p-6 border border-gray-100 soft-shadow h-full flex flex-col">
+                        <div class="flex justify-between items-center mb-5 border-b border-gray-100 pb-3">
+                            <h3 class="text-lg font-bold text-slate-800"><i class="fa-solid fa-clock-rotate-left text-blue-500 mr-2"></i> Riwayat Pencairan</h3>
+                            <button onclick="fetchHistory()" class="text-xs text-blue-500 font-bold hover:underline"><i class="fa-solid fa-rotate"></i> Refresh</button>
+                        </div>
+                        
+                        <div class="flex-1 overflow-y-auto max-h-[300px] custom-scrollbar pr-2" id="historyContainer">
+                            <div class="py-10 text-center text-slate-400">
+                                <i class="fa-solid fa-spinner fa-spin fa-2x mb-3 text-blue-400"></i>
+                                <p class="text-xs">Memuat riwayat transaksi...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-gray-100 soft-shadow overflow-hidden">
+                <div class="flex border-b border-gray-100 bg-slate-50 p-2 gap-2">
+                    <button onclick="switchTab('dikirim')" id="tabBtn-dikirim" class="tab-btn active px-5 py-2.5 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-truck-fast"></i> Sedang Dikirim (<span id="countDikirim">0</span>)
+                    </button>
+                    <button onclick="switchTab('selesai')" id="tabBtn-selesai" class="tab-btn inactive px-5 py-2.5 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2">
+                        <i class="fa-solid fa-check-double"></i> Selesai / Cair (<span id="countSelesai">0</span>)
+                    </button>
+                </div>
+
+                <div id="tabContent-dikirim" class="tab-content active p-0">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-white text-slate-400 text-[10px] uppercase tracking-wider border-b border-gray-100">
+                                    <th class="p-4 font-bold">ID Pesanan</th>
+                                    <th class="p-4 font-bold">Total Nilai</th>
+                                    <th class="p-4 font-bold">Kurir</th>
+                                    <th class="p-4 font-bold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBodyDikirim" class="text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="tabContent-selesai" class="tab-content inactive p-0">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-white text-slate-400 text-[10px] uppercase tracking-wider border-b border-gray-100">
+                                    <th class="p-4 font-bold">ID Pesanan</th>
+                                    <th class="p-4 font-bold">Total Cair</th>
+                                    <th class="p-4 font-bold">Waktu Selesai</th>
+                                    <th class="p-4 font-bold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBodySelesai" class="text-sm"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-10"></div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="addAccountModal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-header">
+                <div class="modal-title-box"><h2><i class="fa-solid fa-vault"></i> Daftarkan Rekening Baru</h2></div>
+                <button class="modal-close" onclick="closeAddAccountModal()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <p class="text-xs text-slate-500 text-left mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100">
+                <i class="fas fa-lock text-blue-500 mr-1"></i> Rekening akan dikunci permanen di <b>Database TiDB</b>. Wajib buat <b>PIN 6 Angka</b>.
+            </p>
+
+            <div class="input-group">
+                <span class="input-label">Pilih Bank / E-Wallet</span>
+                <select id="newBankName" class="neu-input cursor-pointer">
+                    <option value="BCA">BCA</option>
+                    <option value="MANDIRI">Mandiri</option>
+                    <option value="BRI">BRI</option>
+                    <option value="BNI">BNI</option>
+                    <option value="GOPAY">GoPay</option>
+                    <option value="DANA">DANA</option>
+                    <option value="OVO">OVO</option>
+                </select>
+            </div>
+            
+            <div class="input-group">
+                <span class="input-label">Nomor Rekening / No. HP E-Wallet</span>
+                <input type="text" id="newBankAccount" class="neu-input" placeholder="Contoh: 0123456789" maxlength="30">
+            </div>
+
+            <div class="input-group">
+                <span class="input-label">Atas Nama (Sesuai Buku Rekening)</span>
+                <input type="text" id="newAccountName" class="neu-input" placeholder="Contoh: Budi Santoso" autocomplete="off" maxlength="100">
+            </div>
+
+            <div class="input-group mt-6">
+                <span class="input-label text-emerald-600"><i class="fas fa-key mr-1"></i> Buat PIN Keamanan (6 Angka)</span>
+                <input type="password" id="newAccountPin" class="pin-input" placeholder="••••••" maxlength="6" pattern="\d*" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
+            </div>
+
+            <button id="btnSaveNewAccount" class="neu-btn neu-btn-primary w-full mt-4" onclick="saveNewAccount()">
+                <i class="fa-solid fa-save"></i> Simpan ke Database
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="pinModal">
+        <div class="modal-content" style="max-width: 380px;">
+            <div class="text-center w-full mb-4">
+                <div class="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-3 text-blue-500 text-3xl shadow-inner border border-blue-100">
+                    <i class="fa-solid fa-shield-check"></i>
+                </div>
+                <h2 class="text-xl font-bold text-slate-800">Verifikasi Database</h2>
+                <p class="text-xs text-slate-500 mt-1">Sistem akan mencocokkan PIN dengan Server.</p>
+            </div>
+            
+            <div class="input-group mb-6">
+                <input type="password" id="authPinInput" class="pin-input" placeholder="••••••" maxlength="6" pattern="\d*" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
+                <p id="pinErrorMsg" class="text-[10px] text-rose-500 mt-2 font-bold hidden"><i class="fa-solid fa-triangle-exclamation"></i> PIN Salah / Ditolak Server!</p>
+            </div>
+
+            <div class="flex gap-3">
+                <button class="neu-btn bg-slate-200 text-slate-700 hover:bg-slate-300 flex-1" onclick="closePinModal()">Batal</button>
+                <button class="neu-btn neu-btn-success flex-1" id="btnConfirmPin" onclick="verifyPinAndSubmit()">Konfirmasi PIN</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="notificationModal">
+        <div class="modal-content">
+            <div id="notifIcon" class="text-5xl mb-4 text-center w-full flex justify-center"></div>
+            <h3 id="notifTitle" class="text-xl font-extrabold mb-2 text-slate-800 text-center w-full">Judul</h3>
+            <p id="notifMessage" class="text-sm text-slate-500 mb-6 leading-relaxed text-center w-full">Pesan</p>
+            <button class="neu-btn bg-blue-100 text-blue-600 hover:bg-blue-200 w-full" id="notifBtn">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        "use strict";
+
+        // 🔥 SECURITY: Anti Prototype Pollution & Anti DOM Clobbering
+        Object.freeze(Object.prototype);
+        Object.freeze(Array.prototype);
+        Object.freeze(String.prototype);
+
+        // 🔥 SECURITY: Anti Clickjacking / UI Redressing (Framebusting)
+        if (window.top !== window.self) {
+            window.top.location = window.self.location;
+        }
+
+        (function() {
+            let token = null;
+            try {
+                const sessionData = localStorage.getItem('admin_session') || localStorage.getItem('user_session'); 
+                if (sessionData) { token = JSON.parse(sessionData).access_token; }
+            } catch (e) {
+                localStorage.removeItem('admin_session');
+            }
+
+            if (!token) {
+                window.location.replace("login.html");
+                return;
+            }
+
+            const BASE_URL = 'https://rust-vjn7.onrender.com';
+            
+            let sysAvailableBalance = 0; 
+            let sysPendingBalance = 0;
+            let ordersDikirim = [];
+            let ordersSelesai = [];
+            let savedAccounts = [];
+
+            // 🔥 SECURITY: Ketatnya sanitasi HTML (Anti XSS Injection)
+            function escapeHTML(str) {
+                if (!str) return '';
+                return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+            }
+
+            function formatRupiah(num) {
+                let parsed = parseInt(num) || 0;
+                return "Rp " + parsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            function formatDate(dateString) {
+                if (!dateString) return "-";
+                const d = new Date(dateString);
+                return d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            }
+
+            function showNotification(title, message, type) {
+                const modal = document.getElementById('notificationModal');
+                const icon = document.getElementById('notifIcon');
+                const titleEl = document.getElementById('notifTitle');
+                
+                if(type === 'success') {
+                    icon.innerHTML = '<i class="fas fa-check-circle text-emerald-500"></i>';
+                    titleEl.className = "text-xl font-extrabold mb-2 text-emerald-600 text-center w-full";
+                } else if(type === 'error') {
+                    icon.innerHTML = '<i class="fas fa-times-circle text-rose-500"></i>';
+                    titleEl.className = "text-xl font-extrabold mb-2 text-rose-600 text-center w-full";
+                } else {
+                    icon.innerHTML = '<i class="fas fa-info-circle text-blue-500"></i>';
+                    titleEl.className = "text-xl font-extrabold mb-2 text-blue-600 text-center w-full";
+                }
+
+                titleEl.textContent = title;
+                document.getElementById('notifMessage').textContent = message;
+                document.getElementById('notifBtn').onclick = () => modal.classList.remove('active');
+                modal.classList.add('active');
+            }
+
+            // 🔥 SECURITY: Mengunci Fungsi Global (Anti Clobbering / Function Override Attack)
+            Object.defineProperty(window, 'switchTab', {
+                value: function(tabName) {
+                    const btnDikirim = document.getElementById('tabBtn-dikirim');
+                    const btnSelesai = document.getElementById('tabBtn-selesai');
+                    const contentDikirim = document.getElementById('tabContent-dikirim');
+                    const contentSelesai = document.getElementById('tabContent-selesai');
+
+                    if(tabName === 'dikirim') {
+                        btnDikirim.className = "tab-btn active px-5 py-2.5 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2";
+                        btnSelesai.className = "tab-btn inactive px-5 py-2.5 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2";
+                        contentDikirim.classList.add('active'); contentDikirim.classList.remove('inactive');
+                        contentSelesai.classList.remove('active'); contentSelesai.classList.add('inactive');
+                    } else {
+                        btnSelesai.className = "tab-btn active px-5 py-2.5 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2";
+                        btnDikirim.className = "tab-btn inactive px-5 py-2.5 rounded-xl text-sm font-bold border shadow-sm flex items-center gap-2";
+                        contentSelesai.classList.add('active'); contentSelesai.classList.remove('inactive');
+                        contentDikirim.classList.remove('active'); contentDikirim.classList.add('inactive');
+                    }
+                },
+                writable: false, configurable: false
+            });
+
+            async function fetchAccounts() {
+                try {
+                    const res = await fetch(`${BASE_URL}/api/tenant/accounts`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    
+                    if (res.ok) {
+                        savedAccounts = await res.json();
+                    } else {
+                        savedAccounts = [];
+                    }
+                    renderAccounts();
+                    validateWithdrawal();
+                } catch(e) {
+                    console.error("Gagal menarik rekening DB:", e);
+                    savedAccounts = [];
+                    renderAccounts();
+                }
+            }
+
+            async function fetchOrderData() {
+                try {
+                    const res = await fetch(`${BASE_URL}/api/admin/orders`, {
+                        headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-store' }
+                    });
+                    
+                    if (!res.ok) throw new Error("Gagal mengambil data pesanan finansial.");
+                    const data = await res.json();
+                    
+                    ordersDikirim = []; ordersSelesai = [];
+                    sysPendingBalance = 0; sysAvailableBalance = 0;
+
+                    if (Array.isArray(data)) {
+                        data.forEach(order => {
+                            const st = String(order.status).toLowerCase().trim();
+                            const total = Number(order.total_price || order.gross_amount || order.total_amount || order.total || order.price) || 0;
+                            
+                            if (st.includes('kirim') || st.includes('ship') || st.includes('proses') || st.includes('otw')) {
+                                ordersDikirim.push(order);
+                                sysPendingBalance += total;
+                            } 
+                            else if (st.includes('selesai') || st.includes('complete') || st.includes('success') || st.includes('cair')) {
+                                ordersSelesai.push(order);
+                                // sysAvailableBalance += total; // Akan dioverride oleh ledger backend
+                            }
+                        });
+                    }
+
+                    document.getElementById('uiPendingBalance').innerText = formatRupiah(sysPendingBalance);
+                    document.getElementById('countDikirim').innerText = ordersDikirim.length;
+                    document.getElementById('countSelesai').innerText = ordersSelesai.length;
+
+                    renderOrderTables();
+                } catch (error) {
+                    console.error("Error Financial Parsing:", error);
+                    showNotification("Data Backend Belum Siap", "Tidak dapat membaca riwayat pesanan dari Backend.", "error");
+                }
+            }
+
+            function renderOrderTables() {
+                const tbodyDikirim = document.getElementById('tableBodyDikirim');
+                const tbodySelesai = document.getElementById('tableBodySelesai');
+
+                if(ordersDikirim.length === 0) {
+                    tbodyDikirim.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Tidak ada pesanan dalam perjalanan.</td></tr>`;
+                } else {
+                    tbodyDikirim.innerHTML = ordersDikirim.map(o => `
+                        <tr class="border-b border-gray-50 table-row-hover">
+                            <td class="p-4 font-mono text-xs font-bold text-slate-700">#${escapeHTML(o.id || o.order_id || o.uuid)}</td>
+                            <td class="p-4 font-bold text-amber-600">${formatRupiah(o.total_price || o.gross_amount || o.total_amount)}</td>
+                            <td class="p-4 text-xs text-slate-500"><i class="fa-solid fa-box text-slate-300 mr-1"></i>${escapeHTML(o.shipping_courier || o.courier || 'Kurir Standar')}</td>
+                            <td class="p-4"><span class="bg-amber-50 text-amber-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase"><i class="fas fa-truck fa-flip-horizontal mr-1"></i> ${escapeHTML(o.status)}</span></td>
+                        </tr>
+                    `).join('');
+                }
+
+                if(ordersSelesai.length === 0) {
+                    tbodySelesai.innerHTML = `<tr><td colspan="4" class="p-8 text-center text-slate-400 italic">Belum ada pesanan yang selesai.</td></tr>`;
+                } else {
+                    tbodySelesai.innerHTML = ordersSelesai.map(o => `
+                        <tr class="border-b border-gray-50 table-row-hover">
+                            <td class="p-4 font-mono text-xs font-bold text-slate-700">#${escapeHTML(o.id || o.order_id || o.uuid)}</td>
+                            <td class="p-4 font-extrabold text-emerald-600">${formatRupiah(o.total_price || o.gross_amount || o.total_amount)}</td>
+                            <td class="p-4 text-xs text-slate-500">${formatDate(o.updated_at || o.created_at)}</td>
+                            <td class="p-4"><span class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase"><i class="fas fa-check-double mr-1"></i> Cair</span></td>
+                        </tr>
+                    `).join('');
+                }
+            }
+
+            function renderAccounts() {
+                const container = document.getElementById('accountsListContainer');
+                const btnAdd = document.getElementById('btnAddAccountBtn');
+                
+                if (savedAccounts.length >= 2) { btnAdd.classList.add('hidden'); } 
+                else { btnAdd.classList.remove('hidden'); }
+
+                if (savedAccounts.length === 0) {
+                    container.innerHTML = `
+                        <div class="text-center p-4 border-2 border-dashed border-blue-200 bg-blue-50 rounded-xl cursor-pointer hover:bg-blue-100 transition" onclick="window.openAddAccountModal()">
+                            <i class="fas fa-plus-circle text-blue-400 text-2xl mb-2"></i>
+                            <p class="text-xs font-bold text-blue-600">Tambah Rekening Pencairan</p>
+                            <p class="text-[10px] text-blue-400 mt-1">Anda wajib mendaftarkan rekening terlebih dahulu.</p>
+                        </div>
+                    `;
+                    document.getElementById('selectedAccountIndex').value = "-1";
+                    return;
+                }
+
+                const selectedIdx = parseInt(document.getElementById('selectedAccountIndex').value) || 0;
+                const validIdx = (selectedIdx >= 0 && selectedIdx < savedAccounts.length) ? selectedIdx : 0;
+                document.getElementById('selectedAccountIndex').value = validIdx;
+
+                container.innerHTML = savedAccounts.map((acc, index) => {
+                    const safeName = acc.name ? escapeHTML(acc.name) : "Tanpa Nama";
+                    return `
+                        <div class="account-card ${index === validIdx ? 'selected' : ''}" onclick="window.selectAccount(${index})">
+                            <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 font-bold flex-shrink-0">
+                                ${escapeHTML(acc.bank).substring(0,3)}
+                            </div>
+                            <div class="text-left w-full pr-8">
+                                <p class="font-extrabold text-slate-800 text-sm tracking-widest">${escapeHTML(acc.account)}</p>
+                                <p class="text-[10px] text-slate-500 uppercase font-bold mt-1 tracking-wide truncate w-full text-blue-600">A/N: ${safeName}</p>
+                                <p class="text-[9px] text-slate-400 uppercase mt-0.5">${escapeHTML(acc.bank)}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            Object.defineProperty(window, 'selectAccount', {
+                value: function(index) {
+                    document.getElementById('selectedAccountIndex').value = index;
+                    renderAccounts();
+                    validateWithdrawal();
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'openAddAccountModal', {
+                value: function() {
+                    if (savedAccounts.length >= 2) {
+                        showNotification("Batas Maksimal", "Anda hanya dapat mendaftarkan maksimal 2 rekening pencairan demi keamanan.", "warning");
+                        return;
+                    }
+                    document.getElementById('newBankAccount').value = '';
+                    document.getElementById('newAccountName').value = '';
+                    document.getElementById('newAccountPin').value = '';
+                    document.getElementById('addAccountModal').classList.add('active');
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'closeAddAccountModal', {
+                value: function() { document.getElementById('addAccountModal').classList.remove('active'); },
+                writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'saveNewAccount', {
+                value: async function() {
+                    const bank = document.getElementById('newBankName').value;
+                    const account = document.getElementById('newBankAccount').value.trim();
+                    const accName = document.getElementById('newAccountName').value.trim();
+                    const pin = document.getElementById('newAccountPin').value.trim();
+
+                    if (account.length < 5) { showNotification("Data Tidak Valid", "Nomor Rekening terlalu pendek.", "warning"); return; }
+                    if (accName.length < 3) { showNotification("Data Tidak Valid", "Nama Pemilik Rekening wajib diisi.", "warning"); return; }
+                    if (pin.length !== 6) { showNotification("PIN Tidak Valid", "PIN Keamanan WAJIB 6 digit angka.", "warning"); return; }
+
+                    const btn = document.getElementById('btnSaveNewAccount');
+                    const originalHtml = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+                    btn.disabled = true;
+
+                    try {
+                        const res = await fetch(`${BASE_URL}/api/tenant/accounts`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ bank_name: bank, account_number: account, account_name: accName, pin: pin })
+                        });
+                        
+                        if (!res.ok) {
+                            const err = await res.json();
+                            throw new Error(err.error || "Gagal menyimpan rekening.");
+                        }
+                        
+                        closeAddAccountModal();
+                        showNotification("Rekening Terdaftar!", `Rekening berhasil dikunci ke Server Database.`, "success");
+                        
+                        await fetchAccounts();
+                        
+                    } catch(e) {
+                        showNotification("Gagal", e.message, "error");
+                    } finally {
+                        btn.innerHTML = originalHtml;
+                        btn.disabled = false;
+                    }
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'pullMaxBalance', {
+                value: function() {
+                    const input = document.getElementById('withdrawAmount');
+                    input.value = sysAvailableBalance;
+                    validateWithdrawal();
+                }, writable: false, configurable: false
+            });
+
+            window.validateWithdrawal = function() {
+                const input = document.getElementById('withdrawAmount');
+                const btn = document.getElementById('btnWithdraw');
+                const warn = document.getElementById('withdrawWarn');
+                const selectedIdx = parseInt(document.getElementById('selectedAccountIndex').value);
+                
+                const val = Number(input.value);
+
+                if (val > sysAvailableBalance) {
+                    warn.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Nominal melebihi saldo tersedia!`;
+                    warn.classList.remove('hidden');
+                    btn.disabled = true;
+                    input.style.borderColor = '#ef4444';
+                } else if (val < 10000 || isNaN(val)) {
+                    warn.classList.add('hidden');
+                    btn.disabled = true;
+                    input.style.borderColor = '#e2e8f0';
+                } else if (selectedIdx === -1 || savedAccounts.length === 0) {
+                    warn.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Silakan tambah & pilih rekening tujuan.`;
+                    warn.classList.remove('hidden');
+                    btn.disabled = true;
+                } else {
+                    warn.classList.add('hidden');
+                    btn.disabled = false;
+                    input.style.borderColor = '#10b981';
+                }
+            };
+            Object.defineProperty(window, 'validateWithdrawal', { value: window.validateWithdrawal, writable: false, configurable: false });
+
+            Object.defineProperty(window, 'triggerPinModal', {
+                value: function() {
+                    if (document.getElementById('btnWithdraw').disabled) return;
+                    
+                    document.getElementById('authPinInput').value = '';
+                    document.getElementById('pinErrorMsg').classList.add('hidden');
+                    document.getElementById('pinModal').classList.add('active');
+                    
+                    setTimeout(() => { document.getElementById('authPinInput').focus(); }, 100);
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'closePinModal', {
+                value: function() { document.getElementById('pinModal').classList.remove('active'); },
+                writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'verifyPinAndSubmit', {
+                value: async function() {
+                    const inputPin = document.getElementById('authPinInput').value;
+                    const selectedIdx = parseInt(document.getElementById('selectedAccountIndex').value);
+                    const targetAccount = savedAccounts[selectedIdx];
+
+                    const btnConfirm = document.getElementById('btnConfirmPin');
+                    const originalHtmlConfirm = btnConfirm.innerHTML;
+                    btnConfirm.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cek PIN...';
+                    btnConfirm.disabled = true;
+
+                    try {
+                        const pinRes = await fetch(`${BASE_URL}/api/tenant/verify-pin`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify({ account_id: targetAccount.id || 0, pin: inputPin })
+                        });
+                        
+                        if (!pinRes.ok) {
+                            document.getElementById('pinErrorMsg').classList.remove('hidden');
+                            document.getElementById('authPinInput').value = '';
+                            document.getElementById('authPinInput').focus();
+                            return;
+                        }
+
+                        closePinModal();
+                        
+                        const amount = Number(document.getElementById('withdrawAmount').value);
+                        const btn = document.getElementById('btnWithdraw');
+                        const originalHtml = btn.innerHTML;
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mentransfer Dana...';
+                        btn.disabled = true;
+
+                        // Mengirim instruksi penarikan ke Backend (Anti-Parameter Tampering Payload)
+                        const payload = { 
+                            nama_bank: targetAccount.bank, 
+                            nomor_rekening: targetAccount.account, 
+                            nama_pemilik_rekening: targetAccount.name,
+                            nominal: amount 
+                        };
+                        
+                        const res = await fetch(`${BASE_URL}/api/tenant/withdraw`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if(!res.ok) {
+                            const err = await res.json();
+                            throw new Error(err.error || "Gagal menghubungi server Bank.");
+                        }
+
+                        showNotification("Penarikan Berhasil!", `Dana sebesar ${formatRupiah(amount)} sedang diproses ke ${targetAccount.bank} (A/N: ${targetAccount.name}).`, "success");
+                        
+                        document.getElementById('withdrawAmount').value = '';
+
+                        // Re-fetch untuk sinkronisasi absolut dengan TiDB Backend
+                        await window.fetchHistory();
+                        validateWithdrawal();
+
+                    } catch (error) {
+                        showNotification("Gagal", error.message, "error");
+                    } finally {
+                        btnConfirm.innerHTML = originalHtmlConfirm;
+                        btnConfirm.disabled = false;
+                        const btn = document.getElementById('btnWithdraw');
+                        if (btn) btn.innerHTML = '<i class="fa-solid fa-shield-halved"></i> Verifikasi PIN & Tarik';
+                    }
+                }, writable: false, configurable: false
+            });
+
+            // 🔥 SINKRONISASI SALDO ABSOLUT DARI RUST BACKEND
+            window.fetchHistory = async function() {
+                const container = document.getElementById('historyContainer');
+                container.innerHTML = '<div class="py-10 text-center"><i class="fa-solid fa-spinner fa-spin fa-2x mb-3 text-blue-400"></i><p class="text-xs text-slate-400">Menyinkronkan mutasi bank...</p></div>';
+
+                try {
+                    const res = await fetch(`${BASE_URL}/api/tenant/dashboard`, {
+                        headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-store' }
+                    });
+                    
+                    if(!res.ok) throw new Error("Endpoint history tidak tersedia");
+                    const data = await res.json();
+                    
+                    // UPDATE SALDO UI DENGAN ANGKA MUTLAK (Double Entry Ledger)
+                    sysAvailableBalance = Number(data.available_balance) || 0;
+                    document.getElementById('uiAvailableBalance').innerText = formatRupiah(sysAvailableBalance);
+
+                    let historyHtml = '';
+                    
+                    if(data.withdrawals && Array.isArray(data.withdrawals) && data.withdrawals.length > 0) {
+                        data.withdrawals.forEach(w => {
+                            let icon = w.status.toLowerCase() === 'success' || w.status.toLowerCase() === 'selesai' ? '<div class="w-10 h-10 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center border border-emerald-100"><i class="fa-solid fa-check"></i></div>' : 
+                                      (w.status.toLowerCase() === 'pending' || w.status.toLowerCase() === 'diproses' ? '<div class="w-10 h-10 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center border border-amber-100"><i class="fa-solid fa-clock"></i></div>' : 
+                                      '<div class="w-10 h-10 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center border border-rose-100"><i class="fa-solid fa-times"></i></div>');
+                            
+                            historyHtml += `
+                                <div class="flex gap-3 items-center border-b border-gray-50 pb-3 mb-3">
+                                    ${icon}
+                                    <div class="flex-1 text-left">
+                                        <p class="text-sm font-extrabold text-slate-800">${formatRupiah(Number(w.amount))}</p>
+                                        <p class="text-xs text-slate-500">Ke ${escapeHTML(w.bank_name || 'Bank')} • ${formatDate(w.created_at)}</p>
+                                    </div>
+                                    <span class="text-[9px] font-bold uppercase tracking-wider text-slate-400 bg-slate-100 px-2 py-1 rounded">${escapeHTML(w.status)}</span>
+                                </div>
+                            `;
+                        });
+                        container.innerHTML = historyHtml;
+                    } else {
+                        throw new Error("Kosong"); 
+                    }
+
+                } catch(e) {
+                    container.innerHTML = `
+                        <div class="h-full flex flex-col items-center justify-center text-center py-10 opacity-60">
+                            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-slate-300 text-2xl mb-3">
+                                <i class="fa-solid fa-receipt"></i>
+                            </div>
+                            <p class="text-sm font-bold text-slate-600">Belum Ada Transaksi</p>
+                            <p class="text-xs text-slate-400 mt-1 max-w-[200px]">Riwayat penarikan dana Anda ke bank akan muncul di sini.</p>
+                        </div>
+                    `;
+                }
+            };
+            Object.defineProperty(window, 'fetchHistory', { value: window.fetchHistory, writable: false, configurable: false });
+
+            Object.defineProperty(window, 'logoutAdmin', {
+                value: function() {
+                    localStorage.removeItem('admin_session');
+                    localStorage.removeItem('user_session'); 
+                    window.location.replace("login.html"); 
+                }, writable: false, configurable: false
+            });
+
+            // Booting System Sequence
+            window.addEventListener('DOMContentLoaded', () => {
+                fetchAccounts(); 
+                fetchOrderData(); 
+                fetchHistory(); 
+            });
+
+        })();
+    </script>
+</body>
+</html>

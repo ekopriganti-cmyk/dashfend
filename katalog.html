@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Katalog Produk - BAKOEL</title>
+
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.onrender.com https://api.dicebear.com https://api.imgbb.com; img-src 'self' data: https: blob: *; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com;">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        .soft-shadow { box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.03), -4px -4px 10px rgba(255, 255, 255, 1); }
+        .neu-pressed { box-shadow: inset 4px 4px 8px rgba(0,0,0,0.05), inset -4px -4px 8px rgba(255,255,255,0.8); }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 3000; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content { background: #f8fafc; width: 95%; max-width: 750px; border-radius: 25px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(30px); transition: transform 0.3s ease; max-height: 95vh; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-shrink: 0;}
+        .modal-title-box h2 { font-size: 18px; font-weight: 700; color: #2563eb; display: flex; align-items: center; gap: 10px;}
+        .modal-close { background: #fff; border: none; width: 35px; height: 35px; border-radius: 50%; font-size: 16px; color: #475569; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; display: flex; justify-content: center; align-items: center; flex-shrink: 0; transition: all 0.2s;}
+        .modal-close:hover { background: #fee2e2; color: #ef4444; }
+
+        .input-group { margin-bottom: 15px; }
+        .input-label { display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 8px; margin-left: 10px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .neu-input { width: 100%; padding: 12px 20px; border-radius: 15px; border: 1px solid #e2e8f0; background: #fff; color: #1e293b; outline: none; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+        .neu-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .neu-input:disabled { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+        
+        .neu-btn { padding: 12px 20px; border-radius: 15px; border: none; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .neu-btn-primary { background: #2563eb; color: #fff; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+        .neu-btn-primary:hover { background: #1d4ed8; }
+        .neu-btn-danger { background: #ef4444; color: #fff; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); }
+        .neu-btn-danger:hover { background: #dc2626; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .table-row-hover:hover { background-color: #f8fafc; }
+        .sortable-header { cursor: pointer; user-select: none; transition: background-color 0.2s; }
+        .sortable-header:hover { background-color: #f1f5f9; }
+        
+        .toggle-checkbox { right: 50%; z-index: 1; border-color: #cbd5e1; transition: all 0.2s ease-in-out; }
+        .toggle-checkbox:checked { right: 0; border-color: #22c55e; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #22c55e; }
+        
+        .img-thumb-container:hover .img-remove-btn { opacity: 1 !important; visibility: visible !important; transform: scale(1) !important; }
+    </style>
+</head>
+<body class="bg-slate-50 flex font-sans antialiased text-slate-800">
+
+    <aside class="w-64 bg-white border-r border-gray-200 h-screen sticky top-0 flex flex-col z-20 hidden md:flex">
+        <div class="p-6 border-b border-gray-100 flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+            <h2 class="text-xl font-extrabold text-blue-600 tracking-wide">BAKOEL</h2>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="index.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+            </a>
+            <a href="katalog.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl bg-blue-50 text-blue-600 transition-all shadow-sm">
+                <i class="fa-solid fa-list w-5"></i> Katalog Produk
+            </a>
+            <a href="tambah.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-plus-circle w-5"></i> Tambah Produk
+            </a>
+            
+            <a href="lokasi.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-map-location-dot w-5"></i> Alamat Penjemputan
+            </a>
+
+            <a href="penarikan.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-money-bill-transfer w-5"></i> Penarikan Dana
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-100 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors" onclick="logoutAdmin()">
+            <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-500 shadow-sm border border-rose-200">
+                <i class="fa-solid fa-power-off"></i>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-slate-700">Logout</p>
+                <p class="text-xs text-slate-400">Tutup Sesi Admin</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto h-screen bg-[#f3f6fa] custom-scrollbar">
+        <section class="max-w-6xl mx-auto">
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-8 gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">Manajemen Katalog</h1>
+                    <p class="text-sm text-slate-500 mt-1">Kelola stok, harga, dan informasi lengkap produk Anda.</p>
+                </div>
+                <div class="flex flex-wrap gap-2 w-full xl:w-auto items-center justify-start xl:justify-end">
+                    
+                    <button id="btnBulkDelete" class="bg-rose-500 hover:bg-rose-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 hidden" onclick="openBulkDeleteModal()">
+                        <i class="fa-solid fa-trash-can"></i> Hapus (<span id="bulkDeleteCount">0</span>)
+                    </button>
+
+                    <button id="btnBulkEdit" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 hidden" onclick="openBulkEditModal()">
+                        <i class="fa-solid fa-pen-to-square"></i> Edit Massal (<span id="bulkCount">0</span>)
+                    </button>
+                    
+                    <button onclick="exportToExcel()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 whitespace-nowrap" title="Download data katalog ke Excel">
+                        <i class="fas fa-file-excel"></i> Ekspor
+                    </button>
+                    
+                    <label class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer" title="Upload data dari Excel">
+                        <i class="fas fa-upload"></i> Impor
+                        <input type="file" id="excelUploadInput" accept=".xlsx, .xls" class="hidden" onchange="importFromExcel(event)">
+                    </label>
+
+                    <div class="relative flex-1 min-w-[200px] max-w-full xl:max-w-[250px]">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
+                        <input type="text" id="searchInput" oninput="window.toggleClearButton(); window.applyFilterAndSort()" placeholder="Cari nama atau ID..." class="w-full pl-10 pr-10 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                        <button id="clearSearchBtn" onclick="window.clearSearch()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-rose-500 focus:outline-none transition-colors hidden" title="Hapus Pencarian">
+                            <i class="fa-solid fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden soft-shadow flex flex-col">
+                <div class="overflow-x-auto custom-scrollbar flex-grow">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-500 text-[10px] uppercase tracking-wider border-b border-gray-200">
+                                <th class="p-4 font-bold rounded-tl-2xl w-10 text-center">
+                                    <input type="checkbox" id="selectAllCb" class="cursor-pointer w-4 h-4 rounded text-blue-600 border-gray-300" onclick="toggleAll(this.checked)">
+                                </th>
+                                <th class="p-4 font-bold sortable-header" onclick="handleSort('title')">Info Produk <i id="sortIcon-title" class="fas fa-sort ml-1 text-slate-300"></i></th>
+                                <th class="p-4 font-bold sortable-header" onclick="handleSort('price')">Harga Normal <i id="sortIcon-price" class="fas fa-sort ml-1 text-slate-300"></i></th>
+                                <th class="p-4 font-bold sortable-header" onclick="handleSort('promo_price')">Harga Promo <i id="sortIcon-promo_price" class="fas fa-sort ml-1 text-slate-300"></i></th>
+                                <th class="p-4 font-bold text-center sortable-header" onclick="handleSort('quantity')">Stok <i id="sortIcon-quantity" class="fas fa-sort ml-1 text-slate-300"></i></th>
+                                <th class="p-4 font-bold text-center">Status</th>
+                                <th class="p-4 font-bold text-center rounded-tr-2xl">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="catalogTableBody" class="text-sm">
+                            <tr>
+                                <td colspan="7" class="p-12 text-center text-slate-400">
+                                    <i class="fas fa-spinner fa-spin fa-2x mb-3 text-blue-500"></i>
+                                    <p>Menarik data dari server Admin...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="p-4 border-t border-gray-100 bg-slate-50 flex justify-between items-center text-xs text-slate-500 flex-wrap gap-3">
+                    <span id="totalProductCounter" class="font-bold">Total: 0 Produk</span>
+                    
+                    <div class="flex items-center gap-3 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
+                        <button onclick="window.prevPage()" id="btnPrevPage" class="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition text-slate-600"><i class="fas fa-chevron-left"></i></button>
+                        <span id="pageIndicator" class="font-bold text-slate-700 min-w-[100px] text-center">Halaman 1 / 1</span>
+                        <button onclick="window.nextPage()" id="btnNextPage" class="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition text-slate-600"><i class="fas fa-chevron-right"></i></button>
+                    </div>
+
+                    <span class="flex items-center gap-2 hidden md:flex"><i class="fa-solid fa-shield-halved text-green-500"></i> Rute Terlindungi</span>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="excelLoadingModal" style="z-index: 4000;">
+        <div class="modal-content" style="max-width: 350px; text-align: center; justify-content: center; align-items: center; padding: 40px;">
+            <i class="fas fa-file-excel fa-spin fa-3x text-green-500 mb-4"></i>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Memproses File Excel...</h3>
+            <p id="excelLoadingText" class="text-sm text-slate-500">Menjahit data ke Database. Mohon tunggu...</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="bulkDeleteModal">
+        <div class="modal-content" style="max-width: 380px; text-align: center;">
+            <div class="modal-header" style="justify-content: center;"><div class="modal-title-box"><h2 style="color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Peringatan Hapus Massal</h2></div></div>
+            <p style="font-size: 13px; color: #64748b; margin: 10px 0 25px;">Tindakan ini permanen dan tidak bisa dibatalkan! Yakin ingin menghapus <b id="bulkDeleteTextCount" class="text-slate-800 text-lg">0</b> produk yang dicentang secara bersamaan?</p>
+            <div style="display: flex; gap: 10px;">
+                <button class="neu-btn bg-slate-200 text-slate-700 hover:bg-slate-300" onclick="closeBulkDeleteModal()" style="flex: 1;">Batal</button>
+                <button id="btnExecuteBulkDelete" class="neu-btn neu-btn-danger" onclick="executeBulkDelete()" style="flex: 1;">Ya, Hapus Semua</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="bulkEditModal">
+        <div class="modal-content" style="max-width: 850px; height: 90vh;">
+            <div class="modal-header">
+                <div class="modal-title-box"><h2><i class="fa-solid fa-layer-group"></i> Edit Produk Massal</h2></div>
+                <button class="modal-close" onclick="closeBulkEditModal()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-100 p-3 rounded-xl mb-4 text-xs text-blue-700">
+                <i class="fas fa-info-circle mr-1"></i> Ubah harga, promo, dan stok secara cepat. Klik <b>Simpan Massal</b> untuk memproses semuanya sekaligus.
+            </div>
+
+            <div id="bulkEditContainer" class="custom-scrollbar" style="overflow-y: auto; flex-grow: 1; padding-right: 5px; margin-bottom: 15px;">
+            </div>
+            
+            <button class="neu-btn bg-amber-500 hover:bg-amber-600 text-white w-full mt-2 shadow-md" id="btnSaveBulkEdit" onclick="saveBulkEdit()">
+                <i class="fa-solid fa-bolt"></i> Simpan Massal Sekarang
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title-box"><h2><i class="fa-solid fa-pen-to-square"></i> Edit Produk Lengkap</h2></div>
+                <button class="modal-close" onclick="closeEditModal()"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div style="overflow-y: auto; flex-grow: 1; padding-right: 5px; margin-bottom: 15px;" class="custom-scrollbar">
+                <input type="hidden" id="editProdId">
+                <div class="flex gap-4">
+                    <div class="input-group flex-[2]">
+                        <span class="input-label">Nama Produk</span>
+                        <input type="text" id="editProdName" class="neu-input" placeholder="Nama..." maxlength="100">
+                    </div>
+                    <div class="input-group flex-1">
+                        <span class="input-label">Kategori</span>
+                        <input type="text" id="editProdCategory" class="neu-input" placeholder="Sembako" maxlength="50">
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <div class="input-group flex-1">
+                        <span class="input-label">Harga Asli (Rp)</span>
+                        <input type="number" id="editProdPrice" class="neu-input" placeholder="50000" min="0">
+                    </div>
+                    <div class="input-group flex-1">
+                        <span class="input-label">Stok Gudang</span>
+                        <input type="number" id="editProdStock" class="neu-input" placeholder="100" min="0">
+                    </div>
+                    <div class="input-group flex-1">
+                        <span class="input-label">Berat (Gram)</span>
+                        <input type="number" id="editProdWeight" class="neu-input" placeholder="1000" min="0">
+                    </div>
+                </div>
+                
+                <div class="input-group p-4 bg-blue-50 rounded-xl border border-blue-100 mb-4 transition-all">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="input-label mb-0 text-blue-700">Aktifkan Harga Promo?</span>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none h-5">
+                            <input type="checkbox" id="editProdIsPromo" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="window.togglePromoInput()"/>
+                            <label for="editProdIsPromo" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors"></label>
+                        </div>
+                    </div>
+                    <input type="number" id="editProdPromoPrice" class="neu-input bg-white transition-opacity" placeholder="Harga setelah diskon (Rp)" min="0">
+                </div>
+
+                <div class="flex gap-4 flex-col md:flex-row">
+                    <div class="input-group flex-1">
+                        <span class="input-label">Deskripsi Lengkap</span>
+                        <textarea id="editProdDesc" class="neu-input" rows="5" placeholder="Jelaskan produk ini secara detail..."></textarea>
+                        <span class="input-label mt-4">Info (Contoh: Min. Order)</span>
+                        <input type="text" id="editProdInfo" class="neu-input" placeholder="Min. Order: 10 Karung">
+                    </div>
+                    <div class="input-group flex-1 flex flex-col">
+                        <div class="flex justify-between items-center mb-2 ml-2">
+                            <span class="input-label mb-0">Spesifikasi Detail</span>
+                            <button type="button" onclick="window.addFilterRow()" class="text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-100 transition shadow-sm">
+                                <i class="fas fa-plus"></i> Atribut
+                            </button>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-gray-200 rounded-xl flex-1 max-h-48 overflow-y-auto custom-scrollbar shadow-inner">
+                            <div id="editFiltersContainer" class="flex flex-col gap-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="input-group mt-4">
+                    <div class="flex justify-between items-center mb-2 ml-2">
+                        <span class="input-label mb-0">Foto Produk <span id="imgCounter" class="text-blue-500 lowercase">(0/9)</span></span>
+                    </div>
+                    <div class="p-3 bg-white border border-gray-200 rounded-xl">
+                        <div id="editImageGallery" class="flex flex-wrap gap-3"></div>
+                    </div>
+                    <p id="uploadStatus" class="text-[10px] text-slate-400 mt-2 pl-2">Anda bisa mengeblok/memilih banyak foto sekaligus (maks. 9). URL otomatis terisi.</p>
+                    <input type="file" id="editProdFileInput" accept="image/*" multiple class="hidden" onchange="handleImageUpload(event)">
+                </div>
+            </div>
+            <button class="neu-btn neu-btn-primary w-full mt-2" id="btnSaveEdit" onclick="saveProductEdit()">
+                <i class="fa-solid fa-save"></i> Simpan Seluruh Perubahan
+            </button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="deleteModal">
+        <div class="modal-content" style="max-width: 320px; text-align: center;">
+            <div class="modal-header" style="justify-content: center;"><div class="modal-title-box"><h2 style="color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> Hapus Produk</h2></div></div>
+            <p style="font-size: 13px; color: #64748b; margin: 10px 0 25px;">Tindakan ini permanen. Yakin ingin menghapus <b id="deleteProdName" class="text-slate-800"></b> dari katalog?</p>
+            <input type="hidden" id="deleteProdId">
+            <div style="display: flex; gap: 10px;">
+                <button class="neu-btn bg-slate-200 text-slate-700 hover:bg-slate-300" onclick="closeDeleteModal()" style="flex: 1;">Batal</button>
+                <button class="neu-btn neu-btn-danger" onclick="executeDelete()" style="flex: 1;">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="notificationModal">
+        <div class="modal-content" style="max-width: 320px; text-align: center; align-items: center; padding: 30px 20px;">
+            <div id="notifIcon" style="font-size: 45px; margin-bottom: 15px; display: flex; justify-content: center; width: 100%;"></div>
+            <h3 id="notifTitle" style="font-size: 18px; font-weight: 700; margin-bottom: 8px; width: 100%;">Judul</h3>
+            <p id="notifMessage" style="font-size: 13px; color: #64748b; margin-bottom: 25px; line-height: 1.5; width: 100%;">Pesan</p>
+            <button class="neu-btn bg-blue-100 text-blue-600 hover:bg-blue-200" id="notifBtn" style="width: 100%;">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        "use strict";
+
+        (function() {
+            let token = null;
+            try {
+                const sessionData = localStorage.getItem('admin_session'); 
+                if (sessionData) { token = JSON.parse(sessionData).access_token; }
+            } catch (e) {
+                localStorage.removeItem('admin_session');
+            }
+
+            if (!token) {
+                window.location.replace("login.html");
+                return;
+            }
+
+            const BASE_URL = 'https://rust-vjn7.onrender.com';
+            let allProducts = [];
+            let filteredProducts = [];
+            let sortCol = 'id';
+            let sortDesc = true;
+            let currentEditImages = [];
+            let selectedIds = new Set();
+            
+            let currentPage = 1;
+            const itemsPerPage = 50;
+
+            function escapeHTML(str) {
+                if (!str) return '';
+                return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+            }
+
+            function safeURL(url) {
+                if (!url) return 'https://placehold.co/100x100/e0e5ec/a3b1c6?text=Image';
+                let strUrl = typeof url === 'string' ? url.trim() : JSON.stringify(url);
+                if (strUrl === '') return 'https://placehold.co/100x100/e0e5ec/a3b1c6?text=Image';
+                try {
+                    if (strUrl.startsWith('[') || strUrl.startsWith('{')) {
+                        const parsed = JSON.parse(strUrl);
+                        if (Array.isArray(parsed) && parsed.length > 0) { strUrl = String(parsed[0]).trim(); }
+                    }
+                } catch(e) {}
+                strUrl = strUrl.replace(/^["']|["']$/g, '');
+                if (strUrl.startsWith('http://') || strUrl.startsWith('https://') || strUrl.startsWith('data:image')) { return escapeHTML(strUrl); }
+                if (strUrl.startsWith('/')) { return escapeHTML(BASE_URL + strUrl); }
+                return escapeHTML(BASE_URL + '/' + strUrl);
+            }
+
+            function formatRupiah(num) {
+                let parsed = parseInt(num) || 0;
+                return "Rp " + parsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+            }
+
+            function showNotification(title, message, type) {
+                const notifModal = document.getElementById('notificationModal');
+                const notifIcon = document.getElementById('notifIcon');
+                const notifTitle = document.getElementById('notifTitle');
+                const notifMessage = document.getElementById('notifMessage');
+                const notifBtn = document.getElementById('notifBtn');
+
+                if(type === 'success') {
+                    notifIcon.innerHTML = '<i class="fas fa-check-circle" style="color: #22c55e;"></i>';
+                    notifTitle.style.color = '#22c55e';
+                } else if(type === 'error') {
+                    notifIcon.innerHTML = '<i class="fas fa-times-circle" style="color: #ef4444;"></i>';
+                    notifTitle.style.color = '#ef4444';
+                } else {
+                    notifIcon.innerHTML = '<i class="fas fa-info-circle" style="color: #3b82f6;"></i>';
+                    notifTitle.style.color = '#3b82f6';
+                }
+
+                notifTitle.textContent = String(title);
+                notifMessage.textContent = String(message);
+                notifBtn.onclick = function() { notifModal.classList.remove('active'); };
+                notifModal.classList.add('active');
+            }
+
+            // 🔥 LOGIKA UNTUK MENAMPILKAN/MENYEMBUNYIKAN TOMBOL CLEAR SEARCH
+            Object.defineProperty(window, 'toggleClearButton', {
+                value: function() {
+                    const input = document.getElementById('searchInput');
+                    const btn = document.getElementById('clearSearchBtn');
+                    if (input.value.length > 0) {
+                        btn.classList.remove('hidden');
+                    } else {
+                        btn.classList.add('hidden');
+                    }
+                }, writable: false, configurable: false
+            });
+
+            // 🔥 LOGIKA UNTUK MENGHAPUS TEKS PENCARIAN
+            Object.defineProperty(window, 'clearSearch', {
+                value: function() {
+                    const input = document.getElementById('searchInput');
+                    input.value = '';
+                    window.toggleClearButton();
+                    window.applyFilterAndSort();
+                    input.focus(); // Mengembalikan kursor ke kolom pencarian
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'togglePromoInput', {
+                value: function() {
+                    const isChecked = document.getElementById('editProdIsPromo').checked;
+                    const promoInput = document.getElementById('editProdPromoPrice');
+                    if (isChecked) {
+                        promoInput.disabled = false;
+                        promoInput.style.opacity = '1';
+                        promoInput.focus();
+                    } else {
+                        promoInput.disabled = true;
+                        promoInput.style.opacity = '0.5';
+                        promoInput.value = '0';
+                    }
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'toggleBulkPromo', {
+                value: function(checkbox) {
+                    const container = checkbox.closest('.bulk-item');
+                    const promoInput = container.querySelector('.bulk-promo');
+                    if (checkbox.checked) {
+                        promoInput.disabled = false;
+                        promoInput.style.opacity = '1';
+                    } else {
+                        promoInput.disabled = true;
+                        promoInput.style.opacity = '0.5';
+                        promoInput.value = '0';
+                    }
+                }, writable: false, configurable: false
+            });
+
+            async function loadCatalog() {
+                try {
+                    const response = await fetch(`${BASE_URL}/api/admin/catalog`, {
+                        headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-store' }
+                    });
+                    if (!response.ok) throw new Error("Gagal mengambil data katalog Admin.");
+                    
+                    allProducts = await response.json();
+                    window.applyFilterAndSort(); 
+                } catch (error) {
+                    document.getElementById('catalogTableBody').innerHTML = `
+                        <tr><td colspan="7" class="p-12 text-center text-rose-500">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                            <p class="font-bold">Koneksi Database Terputus</p>
+                            <p class="text-xs mt-1">${escapeHTML(error.message)}</p>
+                        </td></tr>
+                    `;
+                }
+            }
+
+            Object.defineProperty(window, 'toggleRow', {
+                value: function(id, isChecked) {
+                    if (isChecked) selectedIds.add(String(id));
+                    else selectedIds.delete(String(id));
+                    updateBulkButton();
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'toggleAll', {
+                value: function(isChecked) {
+                    const cbs = document.querySelectorAll('.row-cb');
+                    cbs.forEach(cb => {
+                        cb.checked = isChecked;
+                        if (isChecked) selectedIds.add(String(cb.value));
+                        else selectedIds.delete(String(cb.value));
+                    });
+                    updateBulkButton();
+                }, writable: false, configurable: false
+            });
+
+            function updateBulkButton() {
+                const btnEdit = document.getElementById('btnBulkEdit');
+                const btnDelete = document.getElementById('btnBulkDelete');
+                
+                document.getElementById('bulkCount').innerText = selectedIds.size;
+                document.getElementById('bulkDeleteCount').innerText = selectedIds.size;
+                
+                if (selectedIds.size > 0) {
+                    btnEdit.classList.remove('hidden');
+                    btnDelete.classList.remove('hidden');
+                } else {
+                    btnEdit.classList.add('hidden');
+                    btnDelete.classList.add('hidden');
+                    document.getElementById('selectAllCb').checked = false;
+                }
+            }
+
+            Object.defineProperty(window, 'openBulkDeleteModal', {
+                value: function() {
+                    document.getElementById('bulkDeleteTextCount').innerText = selectedIds.size;
+                    document.getElementById('bulkDeleteModal').classList.add('active');
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'closeBulkDeleteModal', {
+                value: function() { document.getElementById('bulkDeleteModal').classList.remove('active'); }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'executeBulkDelete', {
+                value: async function() {
+                    const btn = document.getElementById('btnExecuteBulkDelete');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+                    btn.disabled = true;
+
+                    let successCount = 0; let failCount = 0;
+                    
+                    const promises = Array.from(selectedIds).map(async (id) => {
+                        try {
+                            const response = await fetch(`${BASE_URL}/api/admin/catalog/${id}`, {
+                                method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (!response.ok) throw new Error("Gagal");
+                            successCount++;
+                        } catch (e) { failCount++; }
+                    });
+
+                    await Promise.all(promises);
+
+                    btn.innerHTML = originalText; btn.disabled = false;
+                    window.closeBulkDeleteModal();
+                    
+                    if (failCount === 0) showNotification("Berhasil", `${successCount} produk telah dihapus secara permanen.`, "success");
+                    else showNotification("Peringatan", `${successCount} berhasil dihapus, ${failCount} gagal dihapus.`, "warning");
+                    
+                    selectedIds.clear(); 
+                    updateBulkButton();
+                    document.getElementById('selectAllCb').checked = false;
+                    loadCatalog(); 
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'openBulkEditModal', {
+                value: function() {
+                    const container = document.getElementById('bulkEditContainer');
+                    container.innerHTML = '';
+                    
+                    selectedIds.forEach(id => {
+                        const prod = allProducts.find(p => String(p.id) === id);
+                        if (prod) {
+                            const isPromoChecked = prod.is_promo == 1 || prod.is_promo === true;
+                            const div = document.createElement('div');
+                            div.className = 'p-4 bg-white border border-gray-200 rounded-xl mb-3 shadow-sm bulk-item transition hover:border-blue-300';
+                            div.dataset.id = prod.id;
+                            div.innerHTML = `
+                                <div class="font-bold text-slate-700 mb-3 border-b border-gray-100 pb-2 flex justify-between items-center">
+                                    <span class="truncate flex-1 text-sm"><i class="fas fa-box text-blue-500 mr-2"></i>${escapeHTML(prod.title || prod.name || 'Produk')}</span>
+                                    <span class="text-[10px] text-slate-400 font-mono font-normal ml-2 bg-slate-100 px-2 py-1 rounded">ID: ${escapeHTML(String(prod.id))}</span>
+                                </div>
+                                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">Harga Asli</label>
+                                        <input type="number" class="neu-input w-full p-2 text-xs bulk-price" value="${Number(prod.price) || 0}">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">Harga Promo</label>
+                                        <input type="number" class="neu-input w-full p-2 text-xs bulk-promo transition-opacity" value="${isPromoChecked ? Number(prod.promo_price) : 0}" ${isPromoChecked ? '' : 'disabled style="opacity: 0.5;"'}>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">Stok Gudang</label>
+                                        <input type="number" class="neu-input w-full p-2 text-xs bulk-stock" value="${Number(prod.quantity) || 0}">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">Kategori</label>
+                                        <input type="text" class="neu-input w-full p-2 text-xs bulk-category" value="${escapeHTML(prod.category || '')}">
+                                    </div>
+                                </div>
+                                <div class="mt-3 flex items-center justify-between bg-blue-50/50 p-2 rounded-lg border border-blue-50">
+                                    <label class="text-[10px] font-bold text-blue-700 uppercase">Status Promo Aktif?</label>
+                                    <div class="relative inline-block w-8 h-4 align-middle select-none">
+                                        <input type="checkbox" class="toggle-checkbox absolute block w-4 h-4 rounded-full bg-white border-4 appearance-none cursor-pointer bulk-ispromo" ${isPromoChecked ? 'checked' : ''} onchange="window.toggleBulkPromo(this)"/>
+                                        <label class="toggle-label block overflow-hidden h-4 rounded-full bg-gray-300 cursor-pointer transition-colors"></label>
+                                    </div>
+                                </div>
+                            `;
+                            container.appendChild(div);
+                        }
+                    });
+                    document.getElementById('bulkEditModal').classList.add('active');
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'closeBulkEditModal', {
+                value: function() { document.getElementById('bulkEditModal').classList.remove('active'); }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'saveBulkEdit', {
+                value: async function() {
+                    const items = document.querySelectorAll('.bulk-item');
+                    const btn = document.getElementById('btnSaveBulkEdit');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses ke Server...';
+                    btn.disabled = true;
+
+                    let successCount = 0; let failCount = 0;
+
+                    const promises = Array.from(items).map(async (item) => {
+                        const id = item.dataset.id;
+                        const prod = allProducts.find(p => String(p.id) === id);
+                        
+                        const price = Number(item.querySelector('.bulk-price').value);
+                        const is_promo = item.querySelector('.bulk-ispromo').checked ? 1 : 0;
+                        const promo_price = is_promo ? Number(item.querySelector('.bulk-promo').value) : 0;
+                        const quantity = Number(item.querySelector('.bulk-stock').value);
+                        const category = item.querySelector('.bulk-category').value;
+
+                        let validFilters = "{}";
+                        if (typeof prod.filters === 'object') validFilters = JSON.stringify(prod.filters);
+                        else if (typeof prod.filters === 'string' && prod.filters.trim() !== '') validFilters = prod.filters;
+
+                        let imgString = "[]";
+                        let imgRaw = prod.image_url || prod.image || prod.img || '';
+                        if (typeof imgRaw === 'string') {
+                            try {
+                                if (imgRaw.startsWith('[') || imgRaw.startsWith('{')) {
+                                    const parsed = JSON.parse(imgRaw);
+                                    if (Array.isArray(parsed)) imgString = JSON.stringify(parsed.map(u => String(u)));
+                                } else if (imgRaw.trim() !== '') { imgString = JSON.stringify([imgRaw.trim()]); }
+                            } catch(e) { if (imgRaw.trim() !== '') imgString = JSON.stringify([imgRaw.trim()]); }
+                        } else if (Array.isArray(imgRaw)) { imgString = JSON.stringify(imgRaw.map(u => String(u))); }
+
+                        const payload = {
+                            title: prod.title || prod.name || '',
+                            price: price, quantity: quantity, is_promo: is_promo, promo_price: promo_price,
+                            image_url: imgString, desc: prod.desc || '', category: category, info: prod.info || '',
+                            filters: validFilters, weight: Number(prod.weight) || 0
+                        };
+
+                        try {
+                            const response = await fetch(`${BASE_URL}/api/admin/catalog/${id}`, {
+                                method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                body: JSON.stringify(payload)
+                            });
+                            if (!response.ok) throw new Error("Gagal");
+                            successCount++;
+                        } catch (e) { failCount++; }
+                    });
+
+                    await Promise.all(promises);
+
+                    btn.innerHTML = originalText; btn.disabled = false;
+                    window.closeBulkEditModal();
+                    
+                    if (failCount === 0) showNotification("Selesai", `${successCount} produk berhasil diperbarui secara massal!`, "success");
+                    else showNotification("Peringatan", `${successCount} sukses, ${failCount} gagal diperbarui.`, "warning");
+                    
+                    selectedIds.clear(); updateBulkButton();
+                    document.getElementById('selectAllCb').checked = false;
+                    loadCatalog(); 
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'exportToExcel', {
+                value: function() {
+                    if (allProducts.length === 0) {
+                        showNotification("Data Kosong", "Tidak ada produk untuk diekspor.", "warning");
+                        return;
+                    }
+                    const dataToExport = allProducts.map(p => {
+                        
+                        let filterArr = [];
+                        try {
+                            let fObj = typeof p.filters === 'string' ? JSON.parse(p.filters) : (p.filters || {});
+                            for (let k in fObj) {
+                                let val = fObj[k];
+                                if (Array.isArray(val)) val = val.join(', '); 
+                                filterArr.push(`${k}=${val}`);
+                            }
+                        } catch(e) {}
+                        let humanFilter = filterArr.join(' | ');
+
+                        let imgArr = [];
+                        let rawImg = p.image_url || p.image || p.img || '';
+                        if (typeof rawImg === 'string') {
+                            try {
+                                if (rawImg.startsWith('[') || rawImg.startsWith('{')) {
+                                    const parsed = JSON.parse(rawImg);
+                                    if (Array.isArray(parsed)) imgArr = parsed;
+                                    else imgArr = [rawImg];
+                                } else if (rawImg.trim() !== '') { imgArr = [rawImg.trim()]; }
+                            } catch(e) { if (rawImg.trim() !== '') imgArr = [rawImg.trim()]; }
+                        } else if (Array.isArray(rawImg)) { imgArr = rawImg; }
+
+                        return {
+                            "[KUNCI] ID PRODUK (JANGAN DIUBAH)": p.id,
+                            "Nama Produk": p.title || p.name || "",
+                            "Kategori": p.category || "",
+                            "Harga Asli": Number(p.price) || 0,
+                            "Harga Diskon": Number(p.promo_price) || 0,
+                            "Status Promo (Aktif/Tidak)": (p.is_promo == 1 || p.is_promo === true) ? "Aktif" : "Tidak",
+                            "Stok Gudang": Number(p.quantity) || 0,
+                            "Berat (Gram)": Number(p.weight) || 0,
+                            "Info Tambahan": p.info || "",
+                            "Deskripsi Produk": p.desc || "",
+                            "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": humanFilter,
+                            "Foto 1 (Utama)": imgArr[0] || "",
+                            "Foto 2": imgArr[1] || "",
+                            "Foto 3": imgArr[2] || "",
+                            "Foto 4": imgArr[3] || "",
+                            "Foto 5": imgArr[4] || "",
+                            "Foto 6": imgArr[5] || "",
+                            "Foto 7": imgArr[6] || "",
+                            "Foto 8": imgArr[7] || "",
+                            "Foto 9": imgArr[8] || ""
+                        };
+                    });
+
+                    dataToExport.push({
+                        "[KUNCI] ID PRODUK (JANGAN DIUBAH)": "", 
+                        "Nama Produk": "[CONTOH TAMBAH BARU] Sabun Colek",
+                        "Kategori": "Sabun",
+                        "Harga Asli": 10000,
+                        "Harga Diskon": 0,
+                        "Status Promo (Aktif/Tidak)": "Tidak",
+                        "Stok Gudang": 50,
+                        "Berat (Gram)": 200,
+                        "Info Tambahan": "Min. Order: 5",
+                        "Deskripsi Produk": "Ini adalah contoh menambah data baru. Biarkan ID Kosong.",
+                        "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Warna=Putih | Varian=Ekstrak Lemon",
+                        "Foto 1 (Utama)": "https://i.ibb.co.com/contoh1.jpg",
+                        "Foto 2": "https://i.ibb.co.com/contoh2.jpg",
+                        "Foto 3": "", "Foto 4": "", "Foto 5": "", "Foto 6": "", "Foto 7": "", "Foto 8": "", "Foto 9": ""
+                    });
+
+                    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Katalog_Bakoel");
+                    XLSX.writeFile(workbook, "Produk_Katalog_Bakoel.xlsx");
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'importFromExcel', {
+                value: async function(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        try {
+                            document.getElementById('excelLoadingModal').classList.add('active');
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, {type: 'array'});
+                            const firstSheetName = workbook.SheetNames[0];
+                            const worksheet = workbook.Sheets[firstSheetName];
+                            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                            
+                            let successCount = 0; let failCount = 0; let insertCount = 0;
+
+                            const uploadPromises = jsonData.map(async (row) => {
+                                if (row["Nama Produk"] && row["Nama Produk"].includes("[CONTOH TAMBAH BARU]")) return;
+                                
+                                const productId = row["[KUNCI] ID PRODUK (JANGAN DIUBAH)"] ? String(row["[KUNCI] ID PRODUK (JANGAN DIUBAH)"]).trim() : "";
+                                
+                                const isPromoStr = String(row["Status Promo (Aktif/Tidak)"] || "").toLowerCase().trim();
+                                const isPromo = (isPromoStr === "aktif" || isPromoStr === "ya" || isPromoStr === "1") ? 1 : 0;
+                                const promoPrice = isPromo === 1 ? (Number(row["Harga Diskon"]) || 0) : 0;
+
+                                let newImgArr = [];
+                                for (let i = 1; i <= 9; i++) {
+                                    let colName = i === 1 ? "Foto 1 (Utama)" : `Foto ${i}`;
+                                    if (row[colName] && String(row[colName]).trim() !== "") {
+                                        newImgArr.push(String(row[colName]).trim());
+                                    }
+                                }
+                                const payloadImg = JSON.stringify(newImgArr);
+
+                                let rawFilter = row["Atribut Produk (Cth: Warna=Merah | Ukuran=XL)"] || "";
+                                let filterObj = {};
+                                if (rawFilter.trim() !== "") {
+                                    rawFilter.split('|').forEach(pair => {
+                                        let parts = pair.split('=');
+                                        if (parts.length >= 2) {
+                                            let k = parts[0].trim();
+                                            let v = parts.slice(1).join('=').trim(); 
+                                            filterObj[k] = v.split(',').map(s => s.trim()).filter(s => s !== '');
+                                        }
+                                    });
+                                }
+                                const payloadFilter = JSON.stringify(filterObj);
+
+                                const payload = {
+                                    title: row["Nama Produk"] || "",
+                                    price: Number(row["Harga Asli"]) || 0,
+                                    quantity: Number(row["Stok Gudang"]) || 0,
+                                    is_promo: isPromo,
+                                    promo_price: promoPrice,
+                                    image_url: payloadImg,
+                                    desc: row["Deskripsi Produk"] || "",
+                                    category: row["Kategori"] || "",
+                                    info: row["Info Tambahan"] || "",
+                                    filters: payloadFilter,
+                                    weight: Number(row["Berat (Gram)"]) || 0
+                                };
+
+                                if (productId !== "") {
+                                    const res = await fetch(`${BASE_URL}/api/admin/catalog/${productId}`, {
+                                        method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                        body: JSON.stringify(payload)
+                                    });
+                                    if (res.ok) successCount++; else failCount++;
+                                } 
+                                else if (payload.title !== "") {
+                                    const res = await fetch(`${BASE_URL}/api/admin/catalog`, {
+                                        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                        body: JSON.stringify(payload)
+                                    });
+                                    if (res.ok) insertCount++; else failCount++;
+                                }
+                            });
+
+                            await Promise.allSettled(uploadPromises);
+
+                            document.getElementById('excelLoadingModal').classList.remove('active');
+                            showNotification("Laporan Excel Selesai", `${successCount} produk diperbarui, ${insertCount} produk baru ditambahkan, ${failCount} gagal.`, failCount > 0 ? "warning" : "success");
+                            loadCatalog(); 
+                        } catch (error) {
+                            document.getElementById('excelLoadingModal').classList.remove('active');
+                            showNotification("Gagal Membaca Excel", "Pastikan Anda tidak mengubah judul baris teratas.", "error");
+                        }
+                    };
+                    reader.readAsArrayBuffer(file);
+                    event.target.value = '';
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'handleSort', {
+                value: function(column) {
+                    if (sortCol === column) { sortDesc = !sortDesc; } else { sortCol = column; sortDesc = false; }
+                    window.applyFilterAndSort();
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'applyFilterAndSort', {
+                value: function() {
+                    const query = document.getElementById('searchInput').value.toLowerCase();
+                    filteredProducts = allProducts.filter(p => {
+                        const title = (p.title || p.name || '').toLowerCase();
+                        const idStr = String(p.id).toLowerCase();
+                        return title.includes(query) || idStr.includes(query);
+                    });
+
+                    filteredProducts.sort((a, b) => {
+                        let valA = a[sortCol]; let valB = b[sortCol];
+                        if (sortCol === 'title') { valA = (a.title || a.name || '').toLowerCase(); valB = (b.title || b.name || '').toLowerCase(); } 
+                        else { valA = Number(valA) || 0; valB = Number(valB) || 0; }
+                        if (valA < valB) return sortDesc ? 1 : -1;
+                        if (valA > valB) return sortDesc ? -1 : 1;
+                        return 0;
+                    });
+                    
+                    currentPage = 1; 
+                    updateSortIcons(); 
+                    renderTable(filteredProducts);
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'prevPage', {
+                value: function() {
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderTable(filteredProducts);
+                    }
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'nextPage', {
+                value: function() {
+                    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderTable(filteredProducts);
+                    }
+                }, writable: false, configurable: false
+            });
+
+            function updateSortIcons() {
+                const cols = ['title', 'price', 'promo_price', 'quantity'];
+                cols.forEach(col => {
+                    const icon = document.getElementById(`sortIcon-${col}`);
+                    if (icon) {
+                        icon.className = 'fas ml-1';
+                        if (col === sortCol) {
+                            icon.classList.add(sortDesc ? 'fa-sort-down' : 'fa-sort-up');
+                            icon.classList.add('text-blue-500'); icon.classList.remove('text-slate-300');
+                        } else {
+                            icon.classList.add('fa-sort');
+                            icon.classList.add('text-slate-300'); icon.classList.remove('text-blue-500');
+                        }
+                    }
+                });
+            }
+
+            function renderTable(products) {
+                const tbody = document.getElementById('catalogTableBody');
+                tbody.innerHTML = '';
+                document.getElementById('totalProductCounter').innerText = `Total: ${products.length} Produk`;
+
+                const totalPages = Math.ceil(products.length / itemsPerPage) || 1;
+                document.getElementById('pageIndicator').innerText = `Halaman ${currentPage} / ${totalPages}`;
+                document.getElementById('btnPrevPage').disabled = currentPage === 1;
+                document.getElementById('btnNextPage').disabled = currentPage === totalPages;
+
+                if (products.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="p-12 text-center text-slate-400">Tidak ada produk ditemukan.</td></tr>`;
+                    return;
+                }
+
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedProducts = products.slice(startIndex, endIndex);
+
+                const fragment = document.createDocumentFragment();
+
+                paginatedProducts.forEach(p => {
+                    const safeId = escapeHTML(String(p.id));
+                    const safeTitle = escapeHTML(p.title || p.name || 'Produk Tanpa Nama');
+                    const imgUrl = safeURL(p.image_url || p.image || p.img || '');
+                    const price = Number(p.price) || 0;
+                    const isPromo = p.is_promo == 1 || p.is_promo === true;
+                    const promoPrice = Number(p.promo_price) || 0;
+                    const qty = Number(p.quantity) || 0;
+                    
+                    const isChecked = selectedIds.has(safeId) ? 'checked' : '';
+
+                    const statusBadge = qty > 0 
+                        ? `<span class="bg-green-100 text-green-700 px-2 py-1 rounded-md text-[10px] font-bold"><i class="fas fa-check-circle mr-1"></i> Tersedia</span>`
+                        : `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded-md text-[10px] font-bold"><i class="fas fa-times-circle mr-1"></i> Habis</span>`;
+
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-gray-100 table-row-hover transition-colors';
+                    tr.innerHTML = `
+                        <td class="p-4 text-center">
+                            <input type="checkbox" class="row-cb cursor-pointer w-4 h-4 rounded text-blue-600 border-gray-300" value="${safeId}" onclick="toggleRow('${safeId}', this.checked)" ${isChecked}>
+                        </td>
+                        <td class="p-4 flex items-center gap-3">
+                            <img src="${imgUrl}" alt="Img" class="w-12 h-12 rounded-lg object-cover border border-gray-200" onerror="this.src='https://placehold.co/100x100/e0e5ec/a3b1c6?text=Image'">
+                            <div>
+                                <p class="font-bold text-slate-800 line-clamp-1">${safeTitle}</p>
+                                <p class="text-[10px] text-slate-400 font-mono">ID: ${safeId}</p>
+                            </div>
+                        </td>
+                        <td class="p-4 font-semibold text-slate-600">${formatRupiah(price)}</td>
+                        <td class="p-4">
+                            ${isPromo ? `<span class="font-bold text-amber-600">${formatRupiah(promoPrice)}</span><br><span class="text-[10px] text-slate-400 bg-amber-50 px-1 rounded border border-amber-100">Promo Aktif</span>` : `<span class="text-slate-300 text-xs italic">-</span>`}
+                        </td>
+                        <td class="p-4 text-center font-bold ${qty > 10 ? 'text-slate-700' : 'text-rose-500'}">${qty}</td>
+                        <td class="p-4 text-center">${statusBadge}</td>
+                        <td class="p-4 text-center">
+                            <div class="flex justify-center gap-2">
+                                <button onclick="window.triggerEdit('${safeId}')" class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white transition shadow-sm border border-blue-100" title="Edit">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                                <button onclick="window.triggerDelete('${safeId}')" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-600 hover:text-white transition shadow-sm border border-rose-100" title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    fragment.appendChild(tr);
+                });
+                tbody.appendChild(fragment);
+            }
+
+            Object.defineProperty(window, 'addFilterRow', {
+                value: function(key = '', val = '') {
+                    const container = document.getElementById('editFiltersContainer');
+                    const div = document.createElement('div');
+                    div.className = 'flex gap-2 items-center filter-row w-full mb-1';
+                    div.innerHTML = `
+                        <input type="text" class="neu-input flex-1 filter-key text-xs p-2.5 bg-white border-blue-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-200" placeholder="Atribut (Cth: Fungsi)" value="${escapeHTML(key)}">
+                        <input type="text" class="neu-input flex-[1.5] filter-value text-xs p-2.5 bg-white border-blue-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-200" placeholder="Nilai (Cth: Anti Bau)" value="${escapeHTML(val)}">
+                        <button type="button" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition flex-shrink-0 flex items-center justify-center border border-rose-100 shadow-sm" onclick="this.parentElement.remove()" title="Hapus Atribut"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                    `;
+                    container.appendChild(div);
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'renderEditImages', {
+                value: function() {
+                    const gallery = document.getElementById('editImageGallery');
+                    const counter = document.getElementById('imgCounter');
+                    gallery.innerHTML = '';
+                    counter.innerText = `(${currentEditImages.length}/9)`;
+                    
+                    currentEditImages.forEach((url, index) => {
+                        const div = document.createElement('div');
+                        div.className = "relative w-16 h-16 rounded-xl border border-gray-200 overflow-hidden shadow-sm flex-shrink-0 img-thumb-container transition bg-slate-100";
+                        div.innerHTML = `
+                            <img src="${safeURL(url)}" class="w-full h-full object-cover">
+                            <button onclick="window.removeEditImage(${index})" type="button" class="img-remove-btn absolute top-0 right-0 bg-red-500 text-white rounded-bl-xl w-6 h-6 flex items-center justify-center text-[10px] opacity-0 invisible transform scale-90 transition-all hover:bg-red-600 shadow-md" title="Hapus Foto"><i class="fas fa-times"></i></button>
+                        `;
+                        gallery.appendChild(div);
+                    });
+
+                    if (currentEditImages.length < 9) {
+                        const addBtn = document.createElement('label');
+                        addBtn.htmlFor = 'editProdFileInput';
+                        addBtn.className = "w-16 h-16 rounded-xl border-2 border-dashed border-blue-300 text-blue-500 flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 transition flex-shrink-0";
+                        addBtn.innerHTML = '<i class="fas fa-plus mb-1"></i><span class="text-[9px] font-bold">Tambah</span>';
+                        gallery.appendChild(addBtn);
+                    }
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'removeEditImage', {
+                value: function(index) {
+                    currentEditImages.splice(index, 1);
+                    window.renderEditImages();
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'handleImageUpload', {
+                value: async function(event) {
+                    const files = Array.from(event.target.files);
+                    if (files.length === 0) return;
+
+                    if (currentEditImages.length + files.length > 9) {
+                        showNotification("Batas Maksimal", `Anda hanya bisa mengunggah ${9 - currentEditImages.length} foto lagi.`, "warning");
+                        return;
+                    }
+
+                    const statusTxt = document.getElementById('uploadStatus');
+                    const btnSave = document.getElementById('btnSaveEdit');
+                    
+                    for (let file of files) {
+                        if (file.size > 5 * 1024 * 1024) {
+                            showNotification("Terlalu Besar", "Ada foto yang ukurannya melebihi 5MB.", "error");
+                            return;
+                        }
+                    }
+
+                    statusTxt.innerHTML = '<i class="fas fa-user-secret text-slate-500"></i> Meminta otorisasi aman dari Vercel...';
+                    btnSave.disabled = true; 
+                    
+                    try {
+                        const configReq = await fetch('/api/config');
+                        if (!configReq.ok) throw new Error("Gagal mengambil kunci rahasia dari Server Vercel.");
+                        const configData = await configReq.json();
+                        if (!configData.imgbb_api_key) throw new Error("API Key ImgBB tidak ditemukan di .env Vercel!");
+                        
+                        const secureApiKey = configData.imgbb_api_key;
+                        statusTxt.innerHTML = `<i class="fas fa-spinner fa-spin text-blue-500"></i> Mengunggah ${files.length} foto serentak...`;
+                        
+                        const uploadPromises = files.map(async (file) => {
+                            const formData = new FormData();
+                            formData.append('image', file);
+
+                            const res = await fetch(`https://api.imgbb.com/1/upload?key=${secureApiKey}`, {
+                                method: 'POST', body: formData
+                            });
+                            
+                            const data = await res.json();
+                            if (data.success) {
+                                let finalUrl = data.data.url;
+                                return finalUrl.replace("i.ibb.co/", "i.ibb.co.com/");
+                            } else {
+                                throw new Error(data.error.message || "Gagal dari ImgBB.");
+                            }
+                        });
+
+                        const newUrls = await Promise.all(uploadPromises);
+                        currentEditImages.push(...newUrls);
+                        
+                        window.renderEditImages();
+                        statusTxt.innerHTML = `<i class="fas fa-check text-green-500"></i> ${files.length} Foto berhasil diunggah!`;
+                    } catch (error) {
+                        statusTxt.innerHTML = `<i class="fas fa-times text-red-500"></i> Gagal: ${error.message}`;
+                        showNotification("Upload Gagal", error.message, "error");
+                    } finally {
+                        btnSave.disabled = false;
+                        event.target.value = ''; 
+                    }
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'triggerEdit', {
+                value: function(id) {
+                    const safeId = String(id);
+                    const prod = allProducts.find(p => String(p.id) === safeId);
+                    if (!prod) return;
+
+                    document.getElementById('editProdId').value = safeId;
+                    document.getElementById('editProdName').value = escapeHTML(prod.title || prod.name || '');
+                    document.getElementById('editProdCategory').value = escapeHTML(prod.category || '');
+                    
+                    document.getElementById('editProdPrice').value = Number(prod.price) || 0;
+                    document.getElementById('editProdStock').value = Number(prod.quantity) || 0;
+                    document.getElementById('editProdWeight').value = Number(prod.weight) || 0;
+                    
+                    const isPromo = prod.is_promo == 1 || prod.is_promo === true;
+                    document.getElementById('editProdIsPromo').checked = isPromo;
+                    document.getElementById('editProdPromoPrice').value = Number(prod.promo_price) || 0;
+                    
+                    document.getElementById('editProdDesc').value = prod.desc || '';
+                    document.getElementById('editProdInfo').value = prod.info || '';
+                    
+                    const filterContainer = document.getElementById('editFiltersContainer');
+                    filterContainer.innerHTML = '';
+                    
+                    let parsedFilters = {};
+                    try {
+                        if (typeof prod.filters === 'object' && prod.filters !== null) parsedFilters = prod.filters;
+                        else if (typeof prod.filters === 'string' && prod.filters.trim() !== '') parsedFilters = JSON.parse(prod.filters);
+                    } catch(e) {}
+
+                    const keys = Object.keys(parsedFilters);
+                    if (keys.length > 0) {
+                        keys.forEach(k => {
+                            let valStr = parsedFilters[k];
+                            if (Array.isArray(valStr)) valStr = valStr.join(', ');
+                            window.addFilterRow(k, valStr);
+                        });
+                    } else {
+                        window.addFilterRow('', '');
+                    }
+                    
+                    currentEditImages = [];
+                    let imgRaw = prod.image_url || prod.image || prod.img || '';
+                    if (typeof imgRaw === 'string') {
+                        try {
+                            if (imgRaw.startsWith('[') || imgRaw.startsWith('{')) {
+                                const parsed = JSON.parse(imgRaw);
+                                if (Array.isArray(parsed)) currentEditImages = parsed.map(url => String(url));
+                            } else if (imgRaw.trim() !== '') { currentEditImages = [imgRaw.trim()]; }
+                        } catch(e) { if (imgRaw.trim() !== '') currentEditImages = [imgRaw.trim()]; }
+                    } else if (Array.isArray(imgRaw)) { currentEditImages = imgRaw.map(url => String(url)); }
+
+                    document.getElementById('uploadStatus').innerHTML = 'Anda bisa mengeblok/memilih banyak foto sekaligus (maks. 9). URL otomatis terisi.';
+                    window.renderEditImages();
+                    
+                    window.togglePromoInput();
+                    
+                    document.getElementById('editModal').classList.add('active');
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'closeEditModal', {
+                value: function() { document.getElementById('editModal').classList.remove('active'); }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'saveProductEdit', {
+                value: async function() {
+                    if (currentEditImages.length < 1) {
+                        showNotification("Foto Kosong", "Produk minimal harus memiliki 1 foto.", "warning");
+                        return;
+                    }
+                    
+                    let finalFiltersObj = {};
+                    document.querySelectorAll('.filter-row').forEach(row => {
+                        const k = row.querySelector('.filter-key').value.trim();
+                        const v = row.querySelector('.filter-value').value.trim();
+                        if (k && v) {
+                            finalFiltersObj[k] = v.split(',').map(s => s.trim()).filter(s => s !== '');
+                        }
+                    });
+
+                    const id = document.getElementById('editProdId').value;
+                    const isPromoChecked = document.getElementById('editProdIsPromo').checked;
+                    
+                    const payload = {
+                        title: document.getElementById('editProdName').value,
+                        price: Number(document.getElementById('editProdPrice').value),
+                        quantity: Number(document.getElementById('editProdStock').value),
+                        is_promo: isPromoChecked ? 1 : 0,
+                        promo_price: isPromoChecked ? Number(document.getElementById('editProdPromoPrice').value) : 0,
+                        image_url: JSON.stringify(currentEditImages),
+                        desc: document.getElementById('editProdDesc').value,
+                        category: document.getElementById('editProdCategory').value,
+                        info: document.getElementById('editProdInfo').value,
+                        filters: JSON.stringify(finalFiltersObj),
+                        weight: Number(document.getElementById('editProdWeight').value)
+                    };
+
+                    const btn = document.getElementById('btnSaveEdit');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+                    btn.disabled = true;
+
+                    try {
+                        const response = await fetch(`${BASE_URL}/api/admin/catalog/${id}`, {
+                            method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        if (!response.ok) {
+                            const errText = await response.text();
+                            let errMsg = "Gagal menyimpan perubahan ke database.";
+                            try { errMsg = JSON.parse(errText).error || errMsg; } catch(e) { errMsg = errText || errMsg; }
+                            throw new Error(errMsg);
+                        }
+
+                        window.closeEditModal();
+                        showNotification("Berhasil", "Data produk berhasil diperbarui!", "success");
+                        loadCatalog(); 
+
+                    } catch (error) {
+                        showNotification("Peringatan Sistem", error.message, "error");
+                    } finally {
+                        btn.innerHTML = originalText; btn.disabled = false;
+                    }
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'triggerDelete', {
+                value: function(id) {
+                    const safeId = String(id);
+                    const prod = allProducts.find(p => String(p.id) === safeId);
+                    if (!prod) return;
+
+                    document.getElementById('deleteProdId').value = safeId;
+                    document.getElementById('deleteProdName').innerText = escapeHTML(prod.title || prod.name || 'Produk');
+                    document.getElementById('deleteModal').classList.add('active');
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'closeDeleteModal', {
+                value: function() { document.getElementById('deleteModal').classList.remove('active'); }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'executeDelete', {
+                value: async function() {
+                    const id = document.getElementById('deleteProdId').value;
+                    window.closeDeleteModal();
+
+                    try {
+                        const response = await fetch(`${BASE_URL}/api/admin/catalog/${id}`, {
+                            method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
+                        });
+                        if (!response.ok) throw new Error("Gagal menghapus produk dari database.");
+                        showNotification("Berhasil", "Produk telah dihapus dari katalog.", "success");
+                        loadCatalog(); 
+                    } catch (error) {
+                        showNotification("Peringatan Sistem", error.message, "error");
+                    }
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'logoutAdmin', {
+                value: function() {
+                    localStorage.removeItem('admin_session');
+                    localStorage.removeItem('user_session'); 
+                    window.location.replace("login.html"); 
+                }, writable: false, configurable: false
+            });
+
+            window.addEventListener('DOMContentLoaded', loadCatalog);
+
+        })(); 
+    </script>
+</body>
+</html>

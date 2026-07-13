@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tambah Produk - BAKOEL</title>
+
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
+    <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.onrender.com https://api.dicebear.com https://api.imgbb.com; img-src 'self' data: https: blob: *; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.sheetjs.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com;">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        .soft-shadow { box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.03), -4px -4px 10px rgba(255, 255, 255, 1); }
+        .neu-pressed { box-shadow: inset 4px 4px 8px rgba(0,0,0,0.05), inset -4px -4px 8px rgba(255,255,255,0.8); }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 3000; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content { background: #f8fafc; width: 95%; max-width: 500px; border-radius: 25px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateY(30px); transition: transform 0.3s ease; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        
+        .input-group { margin-bottom: 15px; }
+        .input-label { display: block; font-size: 11px; font-weight: 700; color: #64748b; margin-bottom: 8px; margin-left: 10px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .neu-input { width: 100%; padding: 12px 20px; border-radius: 15px; border: 1px solid #e2e8f0; background: #fff; color: #1e293b; outline: none; font-size: 13px; font-weight: 600; transition: all 0.3s; }
+        .neu-input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
+        .neu-input:disabled { background-color: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+        
+        .neu-btn { padding: 12px 20px; border-radius: 15px; border: none; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .neu-btn-primary { background: #2563eb; color: #fff; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2); }
+        .neu-btn-primary:hover { background: #1d4ed8; }
+        
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .toggle-checkbox { right: 50%; z-index: 1; border-color: #cbd5e1; transition: all 0.2s ease-in-out; }
+        .toggle-checkbox:checked { right: 0; border-color: #22c55e; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #22c55e; }
+        
+        .img-thumb-container:hover .img-remove-btn { opacity: 1 !important; visibility: visible !important; transform: scale(1) !important; }
+    </style>
+</head>
+<body class="bg-slate-50 flex font-sans antialiased text-slate-800">
+
+    <aside class="w-64 bg-white border-r border-gray-200 h-screen sticky top-0 flex flex-col z-20 hidden md:flex">
+        <div class="p-6 border-b border-gray-100 flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold shadow-sm">
+                <i class="fa-solid fa-box-open"></i>
+            </div>
+            <h2 class="text-xl font-extrabold text-blue-600 tracking-wide">BAKOEL</h2>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="index.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+            </a>
+            <a href="katalog.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-list w-5"></i> Katalog Produk
+            </a>
+            <a href="tambah.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl bg-blue-50 text-blue-600 transition-all shadow-sm">
+                <i class="fa-solid fa-plus-circle w-5"></i> Tambah Produk
+            </a>
+            
+            <a href="lokasi.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-map-location-dot w-5"></i> Alamat Penjemputan
+            </a>
+
+            <a href="penarikan.html" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold rounded-xl text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all">
+                <i class="fa-solid fa-money-bill-transfer w-5"></i> Penarikan Dana
+            </a>
+        </nav>
+        <div class="p-4 border-t border-gray-100 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition-colors" onclick="logoutAdmin()">
+            <div class="w-10 h-10 rounded-full bg-rose-100 flex items-center justify-center text-rose-500 shadow-sm border border-rose-200">
+                <i class="fa-solid fa-power-off"></i>
+            </div>
+            <div>
+                <p class="text-sm font-bold text-slate-700">Logout</p>
+                <p class="text-xs text-slate-400">Tutup Sesi Admin</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 p-4 md:p-8 overflow-y-auto h-screen bg-[#f3f6fa] custom-scrollbar">
+        <section class="max-w-5xl mx-auto">
+            
+            <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center mb-8 gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-800">Tambah Produk Baru</h1>
+                    <p class="text-sm text-slate-500 mt-1">Tambahkan produk satu per satu atau gunakan Excel untuk upload massal.</p>
+                </div>
+                
+                <div class="flex flex-wrap gap-2 w-full xl:w-auto items-center justify-start xl:justify-end">
+                    <button onclick="downloadExcelTemplate()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 whitespace-nowrap" title="Download Template Kosong dengan Contoh">
+                        <i class="fas fa-file-download"></i> Unduh Template Excel
+                    </button>
+                    
+                    <label class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md transition flex items-center justify-center gap-2 whitespace-nowrap cursor-pointer">
+                        <i class="fas fa-upload"></i> Upload Massal (Excel)
+                        <input type="file" id="excelUploadInput" accept=".xlsx, .xls" class="hidden" onchange="importNewFromExcel(event)">
+                    </label>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden soft-shadow p-6 md:p-8">
+                
+                <h3 class="font-bold text-blue-600 mb-6 flex items-center gap-2 border-b border-gray-100 pb-3">
+                    <i class="fa-solid fa-pen-nib"></i> Form Input Manual
+                </h3>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="input-group flex-[2]">
+                        <span class="input-label">Nama Produk <span class="text-rose-500">*</span></span>
+                        <input type="text" id="addProdName" class="neu-input" placeholder="Masukkan nama produk..." maxlength="100">
+                    </div>
+                    <div class="input-group flex-1">
+                        <span class="input-label">Kategori <span class="text-rose-500">*</span></span>
+                        <input type="text" id="addProdCategory" class="neu-input" placeholder="Contoh: Sembako" maxlength="50">
+                    </div>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="input-group flex-1">
+                        <span class="input-label">Harga Asli (Rp) <span class="text-rose-500">*</span></span>
+                        <input type="number" id="addProdPrice" class="neu-input" placeholder="50000" min="0">
+                    </div>
+                    <div class="input-group flex-1">
+                        <span class="input-label">Stok Gudang <span class="text-rose-500">*</span></span>
+                        <input type="number" id="addProdStock" class="neu-input" placeholder="100" min="0">
+                    </div>
+                    <div class="input-group flex-1">
+                        <span class="input-label">Berat (Gram)</span>
+                        <input type="number" id="addProdWeight" class="neu-input" placeholder="1000" min="0">
+                    </div>
+                </div>
+
+                <div class="input-group p-4 bg-blue-50/50 rounded-xl border border-blue-100 mb-4 transition-all">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="input-label mb-0 text-blue-700">Aktifkan Harga Promo?</span>
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none h-5">
+                            <input type="checkbox" id="addProdIsPromo" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer" onchange="window.togglePromoInput()"/>
+                            <label for="addProdIsPromo" class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer transition-colors"></label>
+                        </div>
+                    </div>
+                    <input type="number" id="addProdPromoPrice" class="neu-input bg-white transition-opacity" placeholder="Harga setelah diskon (Rp)" min="0" disabled style="opacity: 0.5;">
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-6">
+                    <div class="input-group flex-1">
+                        <span class="input-label">Deskripsi Lengkap</span>
+                        <textarea id="addProdDesc" class="neu-input" rows="5" placeholder="Jelaskan produk ini secara detail..."></textarea>
+                        
+                        <span class="input-label mt-4">Info (Contoh: Min. Order)</span>
+                        <input type="text" id="addProdInfo" class="neu-input" placeholder="Min. Order: 10 Karung">
+                    </div>
+                    
+                    <div class="input-group flex-1 flex flex-col">
+                        <div class="flex justify-between items-center mb-2 ml-2">
+                            <span class="input-label mb-0">Spesifikasi Detail (Opsional)</span>
+                            <button type="button" onclick="window.addFilterRow()" class="text-[10px] font-bold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg border border-blue-100 hover:bg-blue-100 transition shadow-sm">
+                                <i class="fas fa-plus"></i> Atribut Baru
+                            </button>
+                        </div>
+                        <div class="p-3 bg-slate-50 border border-gray-200 rounded-xl flex-1 max-h-48 overflow-y-auto custom-scrollbar shadow-inner">
+                            <div id="addFiltersContainer" class="flex flex-col gap-2">
+                                </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-group mt-4 p-4 bg-slate-50 border border-gray-200 rounded-xl">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="input-label mb-0 text-slate-700">Foto Produk <span class="text-rose-500">*</span> <span id="imgCounter" class="text-blue-500 lowercase">(0/9)</span></span>
+                    </div>
+                    
+                    <div class="p-3 bg-white border border-gray-200 rounded-xl">
+                        <div id="addImageGallery" class="flex flex-wrap gap-3">
+                            </div>
+                    </div>
+                    <p id="uploadStatus" class="text-[10px] text-slate-400 mt-2">Anda bisa mengeblok/memilih banyak foto sekaligus (maks. 9). URL otomatis terisi.</p>
+                    <input type="file" id="addProdFileInput" accept="image/*" multiple class="hidden" onchange="handleImageUpload(event)">
+                </div>
+                
+                <button class="neu-btn neu-btn-primary w-full mt-4 py-4 text-base" id="btnSaveNewProduct" onclick="saveNewProduct()">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> Terbitkan Produk Sekarang
+                </button>
+
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="excelLoadingModal" style="z-index: 4000;">
+        <div class="modal-content" style="text-align: center; justify-content: center; align-items: center; padding: 40px;">
+            <i class="fas fa-cloud-upload-alt fa-bounce fa-3x text-blue-500 mb-4"></i>
+            <h3 class="text-lg font-bold text-slate-800 mb-2">Mengunggah Produk Massal...</h3>
+            <p id="excelLoadingText" class="text-sm text-slate-500">Menjahit puluhan data ke Database TiDB. Mohon tunggu...</p>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="notificationModal">
+        <div class="modal-content" style="max-width: 320px; text-align: center; align-items: center; padding: 30px 20px;">
+            <div id="notifIcon" style="font-size: 45px; margin-bottom: 15px; display: flex; justify-content: center; width: 100%;"></div>
+            <h3 id="notifTitle" style="font-size: 18px; font-weight: 700; margin-bottom: 8px; width: 100%;">Judul</h3>
+            <p id="notifMessage" style="font-size: 13px; color: #64748b; margin-bottom: 25px; line-height: 1.5; width: 100%;">Pesan</p>
+            <button class="neu-btn bg-blue-100 text-blue-600 hover:bg-blue-200" id="notifBtn" style="width: 100%;">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        "use strict";
+
+        // =========================================================================
+        // SECURITY PATCH: KUNCI LINGKUNGAN JAVASCRIPT & SANITASI MUTLAK
+        // Mencegah Prototype Pollution (#89), Clickjacking (#3), dan DOM Clobbering (#5)
+        // =========================================================================
+        Object.freeze(Object.prototype);
+        Object.freeze(Array.prototype);
+        Object.freeze(String.prototype);
+
+        if (window.top !== window.self) { 
+            window.top.location = window.self.location; 
+        }
+
+        (function() {
+            let token = null;
+            try {
+                const sessionData = localStorage.getItem('admin_session'); 
+                if (sessionData) { token = JSON.parse(sessionData).access_token; }
+            } catch (e) {
+                localStorage.removeItem('admin_session');
+            }
+
+            if (!token) {
+                window.location.replace("login.html");
+                return;
+            }
+
+            const BASE_URL = 'https://rust-vjn7.onrender.com';
+            let currentImages = [];
+
+            function escapeHTML(str) {
+                if (!str) return '';
+                return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
+            }
+
+            function showNotification(title, message, type) {
+                const notifModal = document.getElementById('notificationModal');
+                const notifIcon = document.getElementById('notifIcon');
+                const notifTitle = document.getElementById('notifTitle');
+                const notifMessage = document.getElementById('notifMessage');
+                const notifBtn = document.getElementById('notifBtn');
+
+                if(type === 'success') {
+                    notifIcon.innerHTML = '<i class="fas fa-check-circle" style="color: #22c55e;"></i>';
+                    notifTitle.style.color = '#22c55e';
+                } else if(type === 'error') {
+                    notifIcon.innerHTML = '<i class="fas fa-times-circle" style="color: #ef4444;"></i>';
+                    notifTitle.style.color = '#ef4444';
+                } else {
+                    notifIcon.innerHTML = '<i class="fas fa-info-circle" style="color: #3b82f6;"></i>';
+                    notifTitle.style.color = '#3b82f6';
+                }
+
+                notifTitle.textContent = String(title);
+                notifMessage.textContent = String(message);
+                notifBtn.onclick = function() { notifModal.classList.remove('active'); };
+                notifModal.classList.add('active');
+            }
+
+            // =========================================================================
+            // TOGGLE PROMO INPUT UNTUK FORM TAMBAH MANUAL
+            // =========================================================================
+            Object.defineProperty(window, 'togglePromoInput', {
+                value: function() {
+                    const isChecked = document.getElementById('addProdIsPromo').checked;
+                    const promoInput = document.getElementById('addProdPromoPrice');
+                    if (isChecked) {
+                        promoInput.disabled = false;
+                        promoInput.style.opacity = '1';
+                        promoInput.focus();
+                    } else {
+                        promoInput.disabled = true;
+                        promoInput.style.opacity = '0.5';
+                        promoInput.value = '';
+                    }
+                }, writable: false, configurable: false
+            });
+
+            // =========================================================================
+            // FILTER/ATRIBUT DINAMIS (Form Manual)
+            // =========================================================================
+            Object.defineProperty(window, 'addFilterRow', {
+                value: function(key = '', val = '') {
+                    const container = document.getElementById('addFiltersContainer');
+                    const div = document.createElement('div');
+                    div.className = 'flex gap-2 items-center filter-row w-full mb-1';
+                    div.innerHTML = `
+                        <input type="text" class="neu-input flex-1 filter-key text-xs p-2.5 bg-white border-blue-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-200" placeholder="Atribut (Cth: Merek)" value="${escapeHTML(key)}">
+                        <input type="text" class="neu-input flex-[1.5] filter-value text-xs p-2.5 bg-white border-blue-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-200" placeholder="Nilai (Cth: Indomie)" value="${escapeHTML(val)}">
+                        <button type="button" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition flex-shrink-0 flex items-center justify-center border border-rose-100 shadow-sm" onclick="this.parentElement.remove()" title="Hapus Atribut"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                    `;
+                    container.appendChild(div);
+                }, writable: false, configurable: false
+            });
+
+            // =========================================================================
+            // MANAJEMEN GAMBAR (Form Manual)
+            // =========================================================================
+            Object.defineProperty(window, 'renderImages', {
+                value: function() {
+                    const gallery = document.getElementById('addImageGallery');
+                    const counter = document.getElementById('imgCounter');
+                    gallery.innerHTML = '';
+                    counter.innerText = `(${currentImages.length}/9)`;
+                    
+                    currentImages.forEach((url, index) => {
+                        const div = document.createElement('div');
+                        div.className = "relative w-20 h-20 rounded-xl border border-gray-200 overflow-hidden shadow-sm flex-shrink-0 img-thumb-container transition bg-slate-100";
+                        div.innerHTML = `
+                            <img src="${escapeHTML(url)}" class="w-full h-full object-cover">
+                            <button onclick="window.removeImage(${index})" type="button" class="img-remove-btn absolute top-0 right-0 bg-red-500 text-white rounded-bl-xl w-6 h-6 flex items-center justify-center text-[10px] opacity-0 invisible transform scale-90 transition-all hover:bg-red-600 shadow-md" title="Hapus Foto"><i class="fas fa-times"></i></button>
+                        `;
+                        gallery.appendChild(div);
+                    });
+
+                    if (currentImages.length < 9) {
+                        const addBtn = document.createElement('label');
+                        addBtn.htmlFor = 'addProdFileInput';
+                        addBtn.className = "w-20 h-20 rounded-xl border-2 border-dashed border-blue-300 text-blue-500 flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 transition flex-shrink-0 bg-blue-50/30";
+                        addBtn.innerHTML = '<i class="fas fa-plus mb-1 text-lg"></i><span class="text-[10px] font-bold">Upload</span>';
+                        gallery.appendChild(addBtn);
+                    }
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'removeImage', {
+                value: function(index) {
+                    currentImages.splice(index, 1);
+                    window.renderImages();
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'handleImageUpload', {
+                value: async function(event) {
+                    const files = Array.from(event.target.files);
+                    if (files.length === 0) return;
+
+                    if (currentImages.length + files.length > 9) {
+                        showNotification("Batas Maksimal", `Anda hanya bisa mengunggah ${9 - currentImages.length} foto lagi.`, "warning");
+                        return;
+                    }
+
+                    const statusTxt = document.getElementById('uploadStatus');
+                    const btnSave = document.getElementById('btnSaveNewProduct');
+                    
+                    for (let file of files) {
+                        if (file.size > 5 * 1024 * 1024) {
+                            showNotification("Terlalu Besar", "Ada foto yang ukurannya melebihi 5MB.", "error");
+                            return;
+                        }
+                    }
+
+                    statusTxt.innerHTML = '<i class="fas fa-shield-halved text-slate-500"></i> Mengautentikasi jalur aman...';
+                    btnSave.disabled = true; 
+                    
+                    try {
+                        // ==============================================================================================
+                        // 🛡️ SECURITY PATCH: CLIENT-SIDE OBFUSCATION (ANTI-SCRAPER BOT GITHUB)
+                        // ⚠️ PENTING: GANTI ARRAY DI BAWAH INI DENGAN API KEY IMGBB ANDA YANG SUDAH DIPECAH!
+                        // Contoh: Jika API Key ImgBB Anda adalah "1a2b3c4d5e6f7g8h9i0",
+                        // Maka pecah menjadi: ['1a2b3c', '4d5e6f', '7g8h9i0']
+                        // ==============================================================================================
+                        const _0xKeyChunks = [
+                            '8b6016e', 
+                            'f63a42e', 
+                            'f8f724199f08', 
+                            '89d9a9'
+                        ];
+                        const secureApiKey = _0xKeyChunks.join('');
+
+                        if (secureApiKey.includes('KUNCI_IMGBB')) {
+                            throw new Error("Anda belum memasukkan API Key ImgBB yang asli di dalam kode HTML (Cek variabel _0xKeyChunks).");
+                        }
+                        
+                        statusTxt.innerHTML = `<i class="fas fa-spinner fa-spin text-blue-500"></i> Mengunggah ${files.length} foto serentak...`;
+                        
+                        const uploadPromises = files.map(async (file) => {
+                            const formData = new FormData();
+                            formData.append('image', file);
+                            const res = await fetch(`https://api.imgbb.com/1/upload?key=${secureApiKey}`, { method: 'POST', body: formData });
+                            const data = await res.json();
+                            if (data.success) return data.data.url.replace("i.ibb.co/", "i.ibb.co.com/");
+                            else throw new Error(data.error.message || "Gagal dari ImgBB.");
+                        });
+
+                        const newUrls = await Promise.all(uploadPromises);
+                        currentImages.push(...newUrls);
+                        
+                        window.renderImages();
+                        statusTxt.innerHTML = `<i class="fas fa-check text-green-500"></i> ${files.length} Foto berhasil diunggah!`;
+                    } catch (error) {
+                        statusTxt.innerHTML = `<i class="fas fa-times text-red-500"></i> Gagal: ${error.message}`;
+                        showNotification("Upload Gagal", error.message, "error");
+                    } finally {
+                        btnSave.disabled = false;
+                        event.target.value = ''; 
+                    }
+                }, writable: false, configurable: false
+            });
+
+            // =========================================================================
+            // FUNGSI SIMPAN PRODUK MANUAL (POST KE BACKEND RUST)
+            // =========================================================================
+            Object.defineProperty(window, 'saveNewProduct', {
+                value: async function() {
+                    const title = document.getElementById('addProdName').value.trim();
+                    const category = document.getElementById('addProdCategory').value.trim();
+                    const price = document.getElementById('addProdPrice').value;
+                    const stock = document.getElementById('addProdStock').value;
+                    
+                    if (!title || !category || price === '' || stock === '') {
+                        showNotification("Data Tidak Lengkap", "Nama, Kategori, Harga, dan Stok wajib diisi!", "warning");
+                        return;
+                    }
+
+                    if (currentImages.length < 1) {
+                        showNotification("Foto Kosong", "Minimal 1 foto produk harus diunggah.", "warning");
+                        return;
+                    }
+                    
+                    let finalFiltersObj = {};
+                    document.querySelectorAll('.filter-row').forEach(row => {
+                        const k = row.querySelector('.filter-key').value.trim();
+                        const v = row.querySelector('.filter-value').value.trim();
+                        if (k && v) {
+                            finalFiltersObj[k] = v.split(',').map(s => s.trim()).filter(s => s !== '');
+                        }
+                    });
+
+                    const isPromoChecked = document.getElementById('addProdIsPromo').checked;
+                    
+                    const payload = {
+                        title: title,
+                        category: category,
+                        price: Number(price),
+                        quantity: Number(stock),
+                        weight: Number(document.getElementById('addProdWeight').value) || 0,
+                        is_promo: isPromoChecked ? 1 : 0,
+                        promo_price: isPromoChecked ? Number(document.getElementById('addProdPromoPrice').value) : 0,
+                        image_url: JSON.stringify(currentImages),
+                        desc: document.getElementById('addProdDesc').value,
+                        info: document.getElementById('addProdInfo').value,
+                        filters: JSON.stringify(finalFiltersObj)
+                    };
+
+                    const btn = document.getElementById('btnSaveNewProduct');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses ke Database...';
+                    btn.disabled = true;
+
+                    try {
+                        const response = await fetch(`${BASE_URL}/api/admin/catalog`, {
+                            method: 'POST', 
+                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        if (!response.ok) {
+                            const errText = await response.text();
+                            let errMsg = "Gagal menyimpan ke database.";
+                            try { errMsg = JSON.parse(errText).error || errMsg; } catch(e) { errMsg = errText || errMsg; }
+                            throw new Error(errMsg);
+                        }
+
+                        showNotification("Berhasil!", "Produk baru sukses ditambahkan ke katalog.", "success");
+                        
+                        // Kosongkan form setelah sukses
+                        document.getElementById('addProdName').value = '';
+                        document.getElementById('addProdCategory').value = '';
+                        document.getElementById('addProdPrice').value = '';
+                        document.getElementById('addProdStock').value = '';
+                        document.getElementById('addProdWeight').value = '';
+                        document.getElementById('addProdDesc').value = '';
+                        document.getElementById('addProdInfo').value = '';
+                        document.getElementById('addProdIsPromo').checked = false;
+                        window.togglePromoInput();
+                        document.getElementById('addFiltersContainer').innerHTML = '';
+                        window.addFilterRow('', ''); // Sisakan 1 baris kosong
+                        currentImages = [];
+                        window.renderImages();
+                        document.getElementById('uploadStatus').innerText = "Anda bisa mengeblok/memilih banyak foto sekaligus (maks. 9).";
+                        
+                    } catch (error) {
+                        showNotification("Error", error.message, "error");
+                    } finally {
+                        btn.innerHTML = originalText; btn.disabled = false;
+                    }
+                }, writable: false, configurable: false
+            });
+
+
+            // =========================================================================
+            // 🔥 DOWNLOAD EXCEL TEMPLATE (DENGAN 2 TAB: CONTOH DAN UPLOAD)
+            // =========================================================================
+            Object.defineProperty(window, 'downloadExcelTemplate', {
+                value: function() {
+                    // 1. DATA UNTUK TAB CONTOH (10 Contoh Rapi)
+                    const dataContoh = [
+                        {
+                            "Nama Produk": "Minyak Goreng Sunco 2L", "Kategori": "Sembako", "Harga Asli": 36000, "Harga Diskon": 34000, "Status Promo (Aktif/Tidak)": "Aktif", "Stok Gudang": 100, "Berat (Gram)": 2000, "Info Tambahan": "Maks. 2 per order", "Deskripsi Produk": "Minyak goreng kelapa sawit jernih.", "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Kemasan=Pouch | Tipe=Kelapa Sawit", "Foto 1 (Utama)": "https://i.ibb.co.com/contoh1.jpg", "Foto 2": "", "Foto 3": ""
+                        },
+                        {
+                            "Nama Produk": "Beras Sania 5Kg", "Kategori": "Sembako", "Harga Asli": 75000, "Harga Diskon": 0, "Status Promo (Aktif/Tidak)": "Tidak", "Stok Gudang": 50, "Berat (Gram)": 5000, "Info Tambahan": "Beras Pulen", "Deskripsi Produk": "Beras kualitas premium tanpa pemutih.", "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Jenis=Pulen | Kemasan=Karung", "Foto 1 (Utama)": "https://i.ibb.co.com/contoh2.jpg", "Foto 2": "", "Foto 3": ""
+                        },
+                        {
+                            "Nama Produk": "Indomie Goreng (1 Dus)", "Kategori": "Makanan", "Harga Asli": 115000, "Harga Diskon": 110000, "Status Promo (Aktif/Tidak)": "Aktif", "Stok Gudang": 20, "Berat (Gram)": 3500, "Info Tambahan": "Isi 40 Bungkus", "Deskripsi Produk": "Mie instan terlaris se-Indonesia.", "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Rasa=Original | Kemasan=Kardus", "Foto 1 (Utama)": "https://i.ibb.co.com/contoh3.jpg", "Foto 2": "https://i.ibb.co.com/contoh3b.jpg", "Foto 3": ""
+                        },
+                        {
+                            "Nama Produk": "Sabun Cuci Piring Sunlight 460ml", "Kategori": "Sabun & Pembersih", "Harga Asli": 12000, "Harga Diskon": 0, "Status Promo (Aktif/Tidak)": "Tidak", "Stok Gudang": 200, "Berat (Gram)": 500, "Info Tambahan": "", "Deskripsi Produk": "Sabun cuci piring ekstrak jeruk nipis.", "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Aroma=Jeruk Nipis", "Foto 1 (Utama)": "https://i.ibb.co.com/contoh4.jpg", "Foto 2": "", "Foto 3": ""
+                        },
+                        {
+                            "Nama Produk": "Kopi Bubuk Kapal Api 165g", "Kategori": "Minuman", "Harga Asli": 15000, "Harga Diskon": 13500, "Status Promo (Aktif/Tidak)": "Aktif", "Stok Gudang": 150, "Berat (Gram)": 165, "Info Tambahan": "Min. Order 3", "Deskripsi Produk": "Kopi hitam murni.", "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Jenis=Kopi Hitam | Kemasan=Plastik", "Foto 1 (Utama)": "https://i.ibb.co.com/contoh5.jpg", "Foto 2": "", "Foto 3": ""
+                        },
+                        {
+                            "Nama Produk": "Teh Celup Sosro Isi 30", "Kategori": "Minuman", "Harga Asli": 6500, "Harga Diskon": 0, "Status Promo (Aktif/Tidak)": "Tidak", "Stok Gudang": 300, "Berat (Gram)": 60, "Info Tambahan": "", "Deskripsi Produk": "Teh hitam celup asli pilihan.", "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Isi=30 Kantong | Rasa=Teh Hitam", "Foto 1 (Utama)": "https://i.ibb.co.com/contoh6.jpg", "Foto 2": "", "Foto 3": ""
+                        },
+                        {
+                            "Nama Produk": "Gula Pasir Gulaku 1Kg", "Kategori": "Sembako", "Harga Asli": 16000, "Harga Diskon": 0, "Status Promo (Aktif/Tidak)": "Tidak", "Stok Gudang": 120, "Berat (Gram)": 1000, "Info Tambahan": "", "Deskripsi Produk": "Gula tebu murni warna putih.", "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Warna=Putih | Berat=1 Kg", "Foto 1 (Utama)": "https://i.ibb.co.com/contoh7.jpg", "Foto 2": "", "Foto 3": ""
+                        },
+                        {
+                            "Nama Produk": "Susu Kental Manis Frisian Flag", "Kategori": "Minuman", "Harga Asli": 14000, "Harga Diskon": 13000, "Status Promo (Aktif/Tidak)": "Aktif", "Stok Gudang": 80, "Berat (Gram)": 370, "Info Tambahan": "", "Deskripsi Produk": "Susu kaleng kental manis rasa original.", "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Rasa=Original | Kemasan=Kaleng", "Foto 1 (Utama)": "https://i.ibb.co.com/contoh8.jpg", "Foto 2": "", "Foto 3": ""
+                        },
+                        {
+                            "Nama Produk": "Sampo Clear Anti Ketombe 160ml", "Kategori": "Perawatan Tubuh", "Harga Asli": 25000, "Harga Diskon": 0, "Status Promo (Aktif/Tidak)": "Tidak", "Stok Gudang": 45, "Berat (Gram)": 200, "Info Tambahan": "", "Deskripsi Produk": "Sampo perawatan kulit kepala anti ketombe.", "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Fungsi=Anti Ketombe | Wangi=Menthol", "Foto 1 (Utama)": "https://i.ibb.co.com/contoh9.jpg", "Foto 2": "", "Foto 3": ""
+                        },
+                        {
+                            "Nama Produk": "Kecap Manis Bango Botol 275ml", "Kategori": "Bumbu Dapur", "Harga Asli": 18000, "Harga Diskon": 17000, "Status Promo (Aktif/Tidak)": "Aktif", "Stok Gudang": 90, "Berat (Gram)": 300, "Info Tambahan": "", "Deskripsi Produk": "Kecap manis kedelai hitam.", "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Bahan=Kedelai Hitam | Kemasan=Botol", "Foto 1 (Utama)": "https://i.ibb.co.com/contoh10.jpg", "Foto 2": "", "Foto 3": ""
+                        }
+                    ];
+
+                    // 2. DATA UNTUK TAB UPLOAD (Tabel Kosong, hanya berisi header dan 1 baris panduan)
+                    const dataUpload = [
+                        {
+                            "Nama Produk": "ISI NAMA DISINI (Wajib)",
+                            "Kategori": "Sembako",
+                            "Harga Asli": 10000,
+                            "Harga Diskon": 0,
+                            "Status Promo (Aktif/Tidak)": "Tidak",
+                            "Stok Gudang": 50,
+                            "Berat (Gram)": 200,
+                            "Info Tambahan": "Panduan: Hapus baris ini sebelum di-upload.",
+                            "Deskripsi Produk": "Baris pertama ini hanya sebagai pengingat kolom. Hapus dan mulai ketik di baris ini.",
+                            "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Warna=Putih | Varian=Ekstrak Lemon",
+                            "Foto 1 (Utama)": "https://i.ibb.co.com/contoh1.jpg",
+                            "Foto 2": "", "Foto 3": "", "Foto 4": "", "Foto 5": "", "Foto 6": "", "Foto 7": "", "Foto 8": "", "Foto 9": ""
+                        }
+                    ];
+
+                    const wb = XLSX.utils.book_new();
+                    
+                    // Membuat Worksheet
+                    const wsContoh = XLSX.utils.json_to_sheet(dataContoh);
+                    const wsUpload = XLSX.utils.json_to_sheet(dataUpload);
+                    
+                    // Memasukkan ke dalam Workbook (Tab)
+                    XLSX.utils.book_append_sheet(wb, wsContoh, "1. Contoh_Pengisian");
+                    XLSX.utils.book_append_sheet(wb, wsUpload, "2. Upload_Produk");
+                    
+                    // Memicu download
+                    XLSX.writeFile(wb, "Template_Tambah_Produk_Bakoel.xlsx");
+                }, writable: false, configurable: false
+            });
+
+
+            // =========================================================================
+            // 🔥 FUNGSI IMPORT MASSAL DARI EXCEL (TAB 2 KHUSUS TAMBAH)
+            // =========================================================================
+            Object.defineProperty(window, 'importNewFromExcel', {
+                value: async function(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        try {
+                            document.getElementById('excelLoadingModal').classList.add('active');
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, {type: 'array'});
+                            
+                            // ⚠️ PENTING: Mencari Sheet "2. Upload_Produk"
+                            let targetSheetName = workbook.SheetNames.find(name => name.includes("Upload"));
+                            // Jika pengguna mengubah nama sheet, fallback ke sheet terakhir (asumsi sheet 2)
+                            if (!targetSheetName) targetSheetName = workbook.SheetNames[workbook.SheetNames.length - 1];
+                            
+                            const worksheet = workbook.Sheets[targetSheetName];
+                            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                            
+                            let successCount = 0; let failCount = 0;
+
+                            const uploadPromises = jsonData.map(async (row) => {
+                                // Lewati baris panduan
+                                if (row["Nama Produk"] && row["Nama Produk"].includes("ISI NAMA DISINI")) return;
+                                if (!row["Nama Produk"] || String(row["Nama Produk"]).trim() === "") return;
+                                
+                                const isPromoStr = String(row["Status Promo (Aktif/Tidak)"] || "").toLowerCase().trim();
+                                const isPromo = (isPromoStr === "aktif" || isPromoStr === "ya" || isPromoStr === "1") ? 1 : 0;
+                                const promoPrice = isPromo === 1 ? (Number(row["Harga Diskon"]) || 0) : 0;
+
+                                // 1. Menjahit Foto
+                                let newImgArr = [];
+                                for (let i = 1; i <= 9; i++) {
+                                    let colName = i === 1 ? "Foto 1 (Utama)" : `Foto ${i}`;
+                                    if (row[colName] && String(row[colName]).trim() !== "") {
+                                        newImgArr.push(String(row[colName]).trim());
+                                    }
+                                }
+                                const payloadImg = JSON.stringify(newImgArr);
+
+                                // 2. Menjahit Spesifikasi
+                                let rawFilter = row["Atribut Produk (Cth: Warna=Merah | Ukuran=XL)"] || "";
+                                let filterObj = {};
+                                if (rawFilter.trim() !== "") {
+                                    rawFilter.split('|').forEach(pair => {
+                                        let parts = pair.split('=');
+                                        if (parts.length >= 2) {
+                                            let k = parts[0].trim();
+                                            let v = parts.slice(1).join('=').trim(); 
+                                            filterObj[k] = v.split(',').map(s => s.trim()).filter(s => s !== '');
+                                        }
+                                    });
+                                }
+                                const payloadFilter = JSON.stringify(filterObj);
+
+                                const payload = {
+                                    title: String(row["Nama Produk"]).trim(),
+                                    price: Number(row["Harga Asli"]) || 0,
+                                    quantity: Number(row["Stok Gudang"]) || 0,
+                                    is_promo: isPromo,
+                                    promo_price: promoPrice,
+                                    image_url: payloadImg,
+                                    desc: row["Deskripsi Produk"] || "",
+                                    category: row["Kategori"] || "",
+                                    info: row["Info Tambahan"] || "",
+                                    filters: payloadFilter,
+                                    weight: Number(row["Berat (Gram)"]) || 0
+                                };
+
+                                // KARENA INI TAMBAH PRODUK, SEMUANYA DITEMBAKKAN SEBAGAI POST
+                                const res = await fetch(`${BASE_URL}/api/admin/catalog`, {
+                                    method: 'POST', 
+                                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                    body: JSON.stringify(payload)
+                                });
+                                
+                                if (res.ok) successCount++; else failCount++;
+                            });
+
+                            await Promise.allSettled(uploadPromises);
+
+                            document.getElementById('excelLoadingModal').classList.remove('active');
+                            
+                            if (successCount > 0) {
+                                showNotification("Upload Massal Sukses", `${successCount} produk baru ditambahkan ke database. ${failCount} gagal.`, failCount > 0 ? "warning" : "success");
+                            } else {
+                                showNotification("Upload Gagal", "Tidak ada data produk valid yang ditemukan di tab Excel tersebut.", "error");
+                            }
+                            
+                        } catch (error) {
+                            document.getElementById('excelLoadingModal').classList.remove('active');
+                            showNotification("Format Salah", "Pastikan Anda mengisi data di Tab '2. Upload_Produk' sesuai template.", "error");
+                        }
+                    };
+                    reader.readAsArrayBuffer(file);
+                    event.target.value = '';
+                }, writable: false, configurable: false
+            });
+
+            Object.defineProperty(window, 'logoutAdmin', {
+                value: function() {
+                    localStorage.removeItem('admin_session');
+                    localStorage.removeItem('user_session'); 
+                    window.location.replace("login.html"); 
+                }, writable: false, configurable: false
+            });
+
+            // Initialize Form
+            window.addEventListener('DOMContentLoaded', () => {
+                window.addFilterRow('', '');
+                window.renderImages();
+            });
+
+        })(); 
+    </script>
+</body>
+</html>

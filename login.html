@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otorisasi Admin - BAKOEL</title>
+
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self' https://*.onrender.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com;">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .soft-shadow { box-shadow: 0 20px 40px -10px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="bg-[#f3f6fa] flex items-center justify-center h-screen font-sans antialiased overflow-hidden">
+
+    <div class="w-full max-w-md p-8 rounded-[30px] glass-panel soft-shadow border border-white relative">
+        <div class="absolute -top-10 -right-10 w-40 h-40 bg-blue-100 rounded-full blur-3xl opacity-50 z-0"></div>
+        <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-indigo-100 rounded-full blur-3xl opacity-50 z-0"></div>
+
+        <div class="relative z-10 flex flex-col items-center">
+            <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold shadow-lg mb-4">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2 class="text-2xl font-extrabold text-slate-800 tracking-wide mb-1">Pusat Kendali</h2>
+            <p class="text-sm text-slate-500 mb-8 font-medium">Masuk dengan kredensial Administrator</p>
+
+            <form id="adminLoginForm" class="w-full space-y-5" onsubmit="handleAdminLogin(event)">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Username Admin</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-user-astronaut"></i>
+                        </div>
+                        <input type="text" id="username" required autocomplete="off" class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all placeholder-slate-400" placeholder="Masukkan username">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1">Kata Sandi</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+                            <i class="fa-solid fa-key"></i>
+                        </div>
+                        <input type="password" id="pin" required class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all placeholder-slate-400" placeholder="••••••••">
+                    </div>
+                </div>
+
+                <div id="errorMsg" class="hidden bg-rose-50 border border-rose-200 text-rose-600 text-xs font-bold px-4 py-3 rounded-xl flex items-center gap-2 mt-4">
+                    <i class="fa-solid fa-circle-exclamation text-base"></i> <span id="errorText">Akses ditolak.</span>
+                </div>
+
+                <button type="submit" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2 mt-6">
+                    <i class="fa-solid fa-right-to-bracket"></i> Otorisasi Masuk
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        "use strict";
+        Object.freeze(Object.prototype);
+        if (window.top !== window.self) { window.top.location = window.self.location; }
+
+        const BASE_URL = 'https://rust-vjn7.onrender.com';
+
+        // Jika sudah login, langsung arahkan ke Dashboard
+        if(localStorage.getItem('admin_session')) {
+            window.location.replace("index.html");
+        }
+
+        async function handleAdminLogin(event) {
+            event.preventDefault();
+            
+            const btn = document.getElementById('btnLogin');
+            const errorBox = document.getElementById('errorMsg');
+            const errorText = document.getElementById('errorText');
+            
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('pin').value;
+
+            if(!u || !p) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Memverifikasi...';
+            errorBox.classList.add('hidden');
+
+            try {
+                const res = await fetch(`${BASE_URL}/api/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: u, pin: p })
+                });
+
+                const data = await res.json();
+
+                if (res.ok && data.access_token) {
+                    btn.innerHTML = '<i class="fa-solid fa-check"></i> Akses Diberikan';
+                    btn.classList.replace('bg-blue-600', 'bg-green-500');
+                    btn.classList.replace('hover:bg-blue-700', 'hover:bg-green-600');
+                    
+                    // Simpan sesi admin (Pisah dari sesi pembeli)
+                    localStorage.removeItem('user_session'); 
+                    localStorage.setItem('admin_session', JSON.stringify({
+                        access_token: data.access_token,
+                        timestamp: Date.now()
+                    }));
+
+                    setTimeout(() => { window.location.replace("index.html"); }, 1000);
+                } else {
+                    throw new Error(data.error || 'Gagal terhubung ke pusat');
+                }
+            } catch (err) {
+                errorBox.classList.remove('hidden');
+                errorText.innerText = err.message;
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Coba Lagi';
+                btn.classList.replace('bg-blue-600', 'bg-rose-500');
+                setTimeout(() => btn.classList.replace('bg-rose-500', 'bg-blue-600'), 1500);
+            }
+        }
+    </script>
+</body>
+</html>
