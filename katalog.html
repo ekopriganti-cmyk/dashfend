@@ -1078,10 +1078,6 @@
                             '89d9a9'
                         ];
                         const secureApiKey = _0xKeyChunks.join('');
-
-                        if (secureApiKey.includes('KUNCI_IMGBB')) {
-                            throw new Error("Anda belum memasukkan API Key ImgBB yang asli di dalam kode HTML (Cek variabel _0xKeyChunks).");
-                        }
                         
                         statusTxt.innerHTML = `<i class="fas fa-spinner fa-spin text-blue-500"></i> Mengunggah ${files.length} foto serentak...`;
                         
