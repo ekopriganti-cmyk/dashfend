@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pendaftaran Mitra & Setup Sistem | Bakoel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .neu-flat { box-shadow: 6px 6px 12px #c5cdd8, -6px -6px 12px #ffffff; }
+        .neu-pressed { box-shadow: inset 4px 4px 8px #c5cdd8, inset -4px -4px 8px #ffffff; }
+        .file-drop-area { border: 2px dashed #94a3b8; transition: all 0.3s; }
+        .file-drop-area.dragover { border-color: #3b82f6; background-color: #eff6ff; }
+    </style>
+</head>
+<body class="bg-[#e0e5ec] min-h-screen flex items-center justify-center p-4 font-sans text-slate-700">
+
+    <div class="max-w-xl w-full bg-[#e0e5ec] rounded-3xl p-8 neu-flat overflow-hidden relative">
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 text-white rounded-2xl shadow-lg mb-4 text-2xl">
+                <i class="fa-solid fa-server"></i>
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-800">Setup Sistem Mitra</h1>
+            <p class="text-sm text-slate-500 mt-1" id="subtitleText">Lengkapi data usaha Anda untuk verifikasi Pusat (Tahap 1 dari 2).</p>
+        </div>
+
+        <!-- ============================================== -->
+        <!-- TAHAP 1: FORMULIR LEGALITAS (KE SUPER ADMIN)   -->
+        <!-- ============================================== -->
+        <form id="step1Form" onsubmit="submitRegistration(event)" class="space-y-5 transition-all duration-500 transform">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Nama Toko</label>
+                    <input type="text" id="namaToko" required class="w-full bg-[#e0e5ec] neu-pressed rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Nama Pemilik</label>
+                    <input type="text" id="namaPemilik" required class="w-full bg-[#e0e5ec] neu-pressed rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Nomor WhatsApp</label>
+                    <input type="tel" id="nomorWa" required class="w-full bg-[#e0e5ec] neu-pressed rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Email Aktif</label>
+                    <input type="email" id="email" required class="w-full bg-[#e0e5ec] neu-pressed rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold">
+                </div>
+            </div>
+
+            <div class="mt-6 p-5 bg-white/50 rounded-2xl border border-slate-200">
+                <h3 class="text-sm font-bold text-slate-700 mb-4"><i class="fa-solid fa-id-card text-blue-500 mr-2"></i> Dokumen Legalitas</h3>
+                <div class="space-y-4">
+                    <div>
+                        <div class="file-drop-area rounded-xl p-4 text-center cursor-pointer bg-white" onclick="document.getElementById('fileKtp').click()">
+                            <i class="fa-solid fa-cloud-arrow-up text-xl text-slate-400 mb-2"></i>
+                            <p class="text-xs font-semibold text-slate-600" id="labelKtp">Upload KTP Pemilik (JPG/PNG)</p>
+                            <input type="file" id="fileKtp" accept="image/*" class="hidden" onchange="updateFileLabel('fileKtp', 'labelKtp')" required>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="file-drop-area rounded-xl p-4 text-center cursor-pointer bg-white" onclick="document.getElementById('fileNpwp').click()">
+                            <i class="fa-solid fa-file-invoice text-xl text-slate-400 mb-2"></i>
+                            <p class="text-xs font-semibold text-slate-600" id="labelNpwp">Upload NPWP (JPG/PNG)</p>
+                            <input type="file" id="fileNpwp" accept="image/*" class="hidden" onchange="updateFileLabel('fileNpwp', 'labelNpwp')" required>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="alertBox1" class="hidden p-4 rounded-xl text-sm font-bold text-center mt-4"></div>
+
+            <button type="submit" id="btnSubmit1" class="w-full bg-blue-600 text-white font-bold rounded-xl py-4 mt-6 shadow-lg shadow-blue-500/30 hover:bg-blue-700 transition-colors flex items-center justify-center gap-2">
+                Simpan & Lanjut ke Tahap 2 <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </form>
+
+        <!-- ============================================== -->
+        <!-- TAHAP 2: SETUP LOKAL DASHBOARD                 -->
+        <!-- ============================================== -->
+        <form id="step2Form" onsubmit="setupLocalDashboard(event)" class="hidden space-y-5 transition-all duration-500 transform">
+            <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100 mb-4 text-center">
+                <i class="fa-solid fa-shield-halved text-4xl text-blue-500 mb-3"></i>
+                <h3 class="text-sm font-bold text-slate-700">Pendaftaran Pusat Berhasil!</h3>
+                <p class="text-xs text-slate-500 mt-2">Sekarang, buat Username dan Password untuk mengakses Dashboard Toko Lokal Anda.</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Username Admin Baru</label>
+                <input type="text" id="localUsername" required class="w-full bg-[#e0e5ec] neu-pressed rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold" placeholder="Contoh: admin_sanlucid">
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Password / PIN Admin</label>
+                <input type="password" id="localPassword" required class="w-full bg-[#e0e5ec] neu-pressed rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold" placeholder="Minimal 6 karakter">
+            </div>
+
+            <div id="alertBox2" class="hidden p-4 rounded-xl text-sm font-bold text-center mt-4"></div>
+
+            <button type="submit" id="btnSubmit2" class="w-full bg-emerald-600 text-white font-bold rounded-xl py-4 mt-6 shadow-lg shadow-emerald-500/30 hover:bg-emerald-700 transition-colors flex items-center justify-center gap-2">
+                <i class="fa-solid fa-check-circle"></i> Buat Akses Lokal & Selesai
+            </button>
+        </form>
+
+    </div>
+
+    <script>
+        // Sesuaikan PORT dengan backend lokal Anda
+        const API_BASE = "http://127.0.0.1:10000";
+
+        function updateFileLabel(inputId, labelId) {
+            const input = document.getElementById(inputId);
+            const label = document.getElementById(labelId);
+            if (input.files && input.files.length > 0) {
+                label.innerHTML = `<span class="text-blue-600"><i class="fa-solid fa-check-circle"></i> ${input.files[0].name}</span>`;
+            }
+        }
+
+        async function submitRegistration(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit1');
+            const alertBox = document.getElementById('alertBox1');
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses ke Pusat...';
+            btn.disabled = true;
+            alertBox.classList.add('hidden');
+
+            const formData = new FormData();
+            formData.append("nama_toko", document.getElementById('namaToko').value);
+            formData.append("nama_pemilik", document.getElementById('namaPemilik').value);
+            formData.append("nomor_wa", document.getElementById('nomorWa').value);
+            formData.append("email", document.getElementById('email').value);
+            formData.append("ktp_file", document.getElementById('fileKtp').files[0]);
+            formData.append("npwp_file", document.getElementById('fileNpwp').files[0]);
+
+            try {
+                // TAHAP 1: Hit Endpoint Backend Lokal untuk diteruskan ke Pusat
+                const res = await fetch(`${API_BASE}/api/init/register-pusat`, { method: 'POST', body: formData });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    // Transisi Animasi Mulus ke Tahap 2
+                    document.getElementById('step1Form').classList.add('hidden');
+                    document.getElementById('step2Form').classList.remove('hidden');
+                    document.getElementById('subtitleText').innerText = "Tahap 2 dari 2: Setup Kredensial Toko Lokal.";
+                } else {
+                    throw new Error(data.error || "Gagal mendaftar ke Pusat.");
+                }
+            } catch (error) {
+                alertBox.className = 'p-4 rounded-xl text-sm font-bold text-center mt-4 bg-rose-100 text-rose-700 border border-rose-200';
+                alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${error.message}`;
+                alertBox.classList.remove('hidden');
+            } finally {
+                btn.innerHTML = 'Simpan & Lanjut ke Tahap 2 <i class="fa-solid fa-arrow-right"></i>';
+                btn.disabled = false;
+            }
+        }
+
+        async function setupLocalDashboard(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSubmit2');
+            const alertBox = document.getElementById('alertBox2');
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyiapkan Database Lokal...';
+            btn.disabled = true;
+            alertBox.classList.add('hidden');
+
+            const payload = {
+                username: document.getElementById('localUsername').value.trim(),
+                pin: document.getElementById('localPassword').value.trim()
+            };
+
+            try {
+                // TAHAP 2: Hit Endpoint Backend Lokal untuk sinkronisasi DB
+                const res = await fetch(`${API_BASE}/api/init/setup-lokal`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await res.json();
+                
+                if (res.ok) {
+                    alertBox.className = 'p-4 rounded-xl text-sm font-bold text-center mt-4 bg-emerald-100 text-emerald-700 border border-emerald-200';
+                    alertBox.innerHTML = `<i class="fa-solid fa-check-double"></i> Selesai! Sistem siap digunakan.`;
+                    alertBox.classList.remove('hidden');
+                    
+                    setTimeout(() => {
+                        window.location.replace('login.html'); // Lempar langsung ke halaman Login Admin
+                    }, 2000);
+                } else {
+                    throw new Error(data.error || "Gagal menyiapkan database lokal.");
+                }
+            } catch (error) {
+                alertBox.className = 'p-4 rounded-xl text-sm font-bold text-center mt-4 bg-rose-100 text-rose-700 border border-rose-200';
+                alertBox.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> ${error.message}`;
+                alertBox.classList.remove('hidden');
+                btn.innerHTML = '<i class="fa-solid fa-check-circle"></i> Buat Akses Lokal & Selesai';
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
