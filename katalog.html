@@ -318,6 +318,18 @@
     <script>
         "use strict";
 
+        // =========================================================================
+        // SECURITY PATCH: KUNCI LINGKUNGAN JAVASCRIPT & SANITASI MUTLAK
+        // Mencegah Prototype Pollution (#89), Clickjacking (#3), dan DOM Clobbering (#5)
+        // =========================================================================
+        Object.freeze(Object.prototype);
+        Object.freeze(Array.prototype);
+        Object.freeze(String.prototype);
+
+        if (window.top !== window.self) { 
+            window.top.location = window.self.location; 
+        }
+
         (function() {
             let token = null;
             try {
@@ -1049,16 +1061,28 @@
                         }
                     }
 
-                    statusTxt.innerHTML = '<i class="fas fa-user-secret text-slate-500"></i> Meminta otorisasi aman dari Vercel...';
+                    statusTxt.innerHTML = '<i class="fas fa-user-secret text-slate-500"></i> Meminta otorisasi aman dari sistem...';
                     btnSave.disabled = true; 
                     
                     try {
-                        const configReq = await fetch('/api/config');
-                        if (!configReq.ok) throw new Error("Gagal mengambil kunci rahasia dari Server Vercel.");
-                        const configData = await configReq.json();
-                        if (!configData.imgbb_api_key) throw new Error("API Key ImgBB tidak ditemukan di .env Vercel!");
+                        // ==============================================================================================
+                        // 🔥 SECURITY PATCH: CLIENT-SIDE OBFUSCATION (ANTI-SCRAPER BOT GITHUB)
+                        // 🔥 PENTING: GANTI ARRAY DI BAWAH INI DENGAN API KEY IMGBB ANDA YANG SUDAH DIPECAH!
+                        // Contoh: Jika API Key ImgBB Anda adalah "1a2b3c4d5e6f7g8h9i0",
+                        // Maka pecah menjadi: ['1a2b3c', '4d5e6f', '7g8h9i0']
+                        // ==============================================================================================
+                        const _0xKeyChunks = [
+                            '8b6016e', 
+                            'f63a42e', 
+                            'f8f724199f08', 
+                            '89d9a9'
+                        ];
+                        const secureApiKey = _0xKeyChunks.join('');
+
+                        if (secureApiKey.includes('KUNCI_IMGBB')) {
+                            throw new Error("Anda belum memasukkan API Key ImgBB yang asli di dalam kode HTML (Cek variabel _0xKeyChunks).");
+                        }
                         
-                        const secureApiKey = configData.imgbb_api_key;
                         statusTxt.innerHTML = `<i class="fas fa-spinner fa-spin text-blue-500"></i> Mengunggah ${files.length} foto serentak...`;
                         
                         const uploadPromises = files.map(async (file) => {
