@@ -24,9 +24,7 @@
             <p class="text-sm text-slate-500 mt-1" id="subtitleText">Lengkapi data usaha Anda untuk verifikasi Pusat (Tahap 1 dari 2).</p>
         </div>
 
-        <!-- ============================================== -->
-        <!-- TAHAP 1: FORMULIR LEGALITAS (KE SUPER ADMIN)   -->
-        <!-- ============================================== -->
+        <!-- TAHAP 1: FORMULIR LEGALITAS -->
         <form id="step1Form" onsubmit="submitRegistration(event)" class="space-y-5 transition-all duration-500 transform">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
@@ -50,21 +48,33 @@
                 </div>
             </div>
 
+            <!-- TAMBAHAN: KOLOM INPUT ANGKA KTP & NPWP -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mt-2">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Nomor KTP (NIK)</label>
+                    <input type="number" id="noKtp" required class="w-full bg-[#e0e5ec] neu-pressed rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Nomor NPWP</label>
+                    <input type="text" id="noNpwp" class="w-full bg-[#e0e5ec] neu-pressed rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold" placeholder="Opsional jika tidak ada">
+                </div>
+            </div>
+
             <div class="mt-6 p-5 bg-white/50 rounded-2xl border border-slate-200">
                 <h3 class="text-sm font-bold text-slate-700 mb-4"><i class="fa-solid fa-id-card text-blue-500 mr-2"></i> Dokumen Legalitas</h3>
                 <div class="space-y-4">
                     <div>
                         <div class="file-drop-area rounded-xl p-4 text-center cursor-pointer bg-white" onclick="document.getElementById('fileKtp').click()">
                             <i class="fa-solid fa-cloud-arrow-up text-xl text-slate-400 mb-2"></i>
-                            <p class="text-xs font-semibold text-slate-600" id="labelKtp">Upload KTP Pemilik (JPG/PNG)</p>
+                            <p class="text-xs font-semibold text-slate-600" id="labelKtp">Upload Foto KTP (JPG/PNG)</p>
                             <input type="file" id="fileKtp" accept="image/*" class="hidden" onchange="updateFileLabel('fileKtp', 'labelKtp')" required>
                         </div>
                     </div>
                     <div>
                         <div class="file-drop-area rounded-xl p-4 text-center cursor-pointer bg-white" onclick="document.getElementById('fileNpwp').click()">
                             <i class="fa-solid fa-file-invoice text-xl text-slate-400 mb-2"></i>
-                            <p class="text-xs font-semibold text-slate-600" id="labelNpwp">Upload NPWP (JPG/PNG)</p>
-                            <input type="file" id="fileNpwp" accept="image/*" class="hidden" onchange="updateFileLabel('fileNpwp', 'labelNpwp')" required>
+                            <p class="text-xs font-semibold text-slate-600" id="labelNpwp">Upload Foto NPWP (JPG/PNG)</p>
+                            <input type="file" id="fileNpwp" accept="image/*" class="hidden" onchange="updateFileLabel('fileNpwp', 'labelNpwp')">
                         </div>
                     </div>
                 </div>
@@ -77,9 +87,7 @@
             </button>
         </form>
 
-        <!-- ============================================== -->
-        <!-- TAHAP 2: SETUP LOKAL DASHBOARD                 -->
-        <!-- ============================================== -->
+        <!-- TAHAP 2: SETUP LOKAL DASHBOARD -->
         <form id="step2Form" onsubmit="setupLocalDashboard(event)" class="hidden space-y-5 transition-all duration-500 transform">
             <div class="p-6 bg-blue-50 rounded-2xl border border-blue-100 mb-4 text-center">
                 <i class="fa-solid fa-shield-halved text-4xl text-blue-500 mb-3"></i>
@@ -89,7 +97,7 @@
 
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2 ml-1">Username Admin Baru</label>
-                <input type="text" id="localUsername" required class="w-full bg-[#e0e5ec] neu-pressed rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold" placeholder="Contoh: admin_sanlucid">
+                <input type="text" id="localUsername" required class="w-full bg-[#e0e5ec] neu-pressed rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-400 text-sm font-semibold" placeholder="Contoh: admin_toko">
             </div>
             
             <div>
@@ -107,12 +115,11 @@
     </div>
 
     <script>
-        // Cek jika sudah login sebagai admin, tendang kembali ke Dashboard
         if(localStorage.getItem('admin_session')) {
             window.location.replace("index.html");
-}
-        // Sesuaikan PORT dengan backend lokal Anda
-        const API_BASE = "https://rusty-c22o.onrender.com";
+        }
+
+        const API_BASE = "https://rusty-c22o.onrender.com"; // Pastikan ini mengarah ke URL Backend Anda
 
         function updateFileLabel(inputId, labelId) {
             const input = document.getElementById(inputId);
@@ -136,16 +143,22 @@
             formData.append("nama_pemilik", document.getElementById('namaPemilik').value);
             formData.append("nomor_wa", document.getElementById('nomorWa').value);
             formData.append("email", document.getElementById('email').value);
+            
+            // TAMBAHAN: Mengirim teks NIK & NPWP ke backend
+            formData.append("no_ktp", document.getElementById('noKtp').value);
+            formData.append("no_npwp", document.getElementById('noNpwp').value);
+
             formData.append("ktp_file", document.getElementById('fileKtp').files[0]);
-            formData.append("npwp_file", document.getElementById('fileNpwp').files[0]);
+            
+            if(document.getElementById('fileNpwp').files[0]) {
+                formData.append("npwp_file", document.getElementById('fileNpwp').files[0]);
+            }
 
             try {
-                // TAHAP 1: Hit Endpoint Backend Lokal untuk diteruskan ke Pusat
                 const res = await fetch(`${API_BASE}/api/init/register-pusat`, { method: 'POST', body: formData });
                 const data = await res.json();
                 
                 if (res.ok) {
-                    // Transisi Animasi Mulus ke Tahap 2
                     document.getElementById('step1Form').classList.add('hidden');
                     document.getElementById('step2Form').classList.remove('hidden');
                     document.getElementById('subtitleText').innerText = "Tahap 2 dari 2: Setup Kredensial Toko Lokal.";
@@ -177,7 +190,6 @@
             };
 
             try {
-                // TAHAP 2: Hit Endpoint Backend Lokal untuk sinkronisasi DB
                 const res = await fetch(`${API_BASE}/api/init/setup-lokal`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -192,7 +204,7 @@
                     alertBox.classList.remove('hidden');
                     
                     setTimeout(() => {
-                        window.location.replace('login.html'); // Lempar langsung ke halaman Login Admin
+                        window.location.replace('login.html'); 
                     }, 2000);
                 } else {
                     throw new Error(data.error || "Gagal menyiapkan database lokal.");
