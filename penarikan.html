@@ -518,17 +518,18 @@
                 const validIdx = (selectedIdx >= 0 && selectedIdx < savedAccounts.length) ? selectedIdx : 0;
                 document.getElementById('selectedAccountIndex').value = validIdx;
 
+                // BUGFIX: Menyesuaikan key object sesuai response JSON dari Rust Backend
                 container.innerHTML = savedAccounts.map((acc, index) => {
-                    const safeName = acc.name ? escapeHTML(acc.name) : "Tanpa Nama";
+                    const safeName = acc.account_name ? escapeHTML(acc.account_name) : "Tanpa Nama";
                     return `
                         <div class="account-card ${index === validIdx ? 'selected' : ''}" onclick="window.selectAccount(${index})">
                             <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 font-bold flex-shrink-0">
-                                ${escapeHTML(acc.bank).substring(0,3)}
+                                ${escapeHTML(acc.bank_name).substring(0,3)}
                             </div>
                             <div class="text-left w-full pr-8">
-                                <p class="font-extrabold text-slate-800 text-sm tracking-widest">${escapeHTML(acc.account)}</p>
+                                <p class="font-extrabold text-slate-800 text-sm tracking-widest">${escapeHTML(acc.account_number)}</p>
                                 <p class="text-[10px] text-slate-500 uppercase font-bold mt-1 tracking-wide truncate w-full text-blue-600">A/N: ${safeName}</p>
-                                <p class="text-[9px] text-slate-400 uppercase mt-0.5">${escapeHTML(acc.bank)}</p>
+                                <p class="text-[9px] text-slate-400 uppercase mt-0.5">${escapeHTML(acc.bank_name)}</p>
                             </div>
                         </div>
                     `;
@@ -690,11 +691,11 @@
                         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mentransfer Dana...';
                         btn.disabled = true;
 
-                        // Mengirim instruksi penarikan ke Backend (Anti-Parameter Tampering Payload)
+                        // BUGFIX: Menggunakan key yang sesuai dengan property dari object account
                         const payload = { 
-                            nama_bank: targetAccount.bank, 
-                            nomor_rekening: targetAccount.account, 
-                            nama_pemilik_rekening: targetAccount.name,
+                            nama_bank: targetAccount.bank_name, 
+                            nomor_rekening: targetAccount.account_number, 
+                            nama_pemilik_rekening: targetAccount.account_name,
                             nominal: amount 
                         };
                         
@@ -709,7 +710,8 @@
                             throw new Error(err.error || "Gagal menghubungi server Bank.");
                         }
 
-                        showNotification("Penarikan Berhasil!", `Dana sebesar ${formatRupiah(amount)} sedang diproses ke ${targetAccount.bank} (A/N: ${targetAccount.name}).`, "success");
+                        // BUGFIX: Notifikasi dengan variabel nama dan bank yang benar
+                        showNotification("Penarikan Berhasil!", `Dana sebesar ${formatRupiah(amount)} sedang diproses ke ${targetAccount.bank_name} (A/N: ${targetAccount.account_name}).`, "success");
                         
                         document.getElementById('withdrawAmount').value = '';
 
