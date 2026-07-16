@@ -6,7 +6,6 @@
     <title>Katalog Produk - BAKOEL</title>
 
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
     <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin">
@@ -320,42 +319,42 @@
     </div>
 
     <script>
-        "use strict";
+        'use strict';
 
-        // 🔥 SECURITY: Anti Prototype Pollution & Anti DOM Clobbering[cite: 10]
-        Object.freeze(Object.prototype);[cite: 10]
-        Object.freeze(Array.prototype);[cite: 10]
-        Object.freeze(String.prototype);[cite: 10]
+        // 🔥 SECURITY: Anti Prototype Pollution & Anti DOM Clobbering
+        Object.freeze( Object.prototype );
+        Object.freeze( Array.prototype );
+        Object.freeze( String.prototype );
 
-        // 🔥 SECURITY: Anti Clickjacking / UI Redressing (Framebusting)[cite: 10]
-        if (window.top !== window.self) { 
-            window.top.location = window.self.location;[cite: 10]
+        // 🔥 SECURITY: Anti Clickjacking / UI Redressing (Framebusting)
+        if ( window.top !== window.self ) { 
+            window.top.location = window.self.location; 
         }
 
         (function() {
             let token = null;
             try {
                 const sessionData = localStorage.getItem('admin_session'); 
-                if (sessionData) { token = JSON.parse(sessionData).access_token; }[cite: 10]
+                if (sessionData) { token = JSON.parse(sessionData).access_token; }
             } catch (e) {
-                localStorage.removeItem('admin_session');[cite: 10]
+                localStorage.removeItem('admin_session');
             }
 
             if (!token) {
-                window.location.replace("login.html");[cite: 10]
+                window.location.replace("login.html");
                 return;
             }
 
-            const BASE_URL = 'https://rusty-c22o.onrender.com';[cite: 10]
-            let allProducts = [];[cite: 10]
-            let filteredProducts = [];[cite: 10]
-            let sortCol = 'id';[cite: 10]
-            let sortDesc = true;[cite: 10]
-            let currentEditImages = [];[cite: 10]
-            let selectedIds = new Set();[cite: 10]
+            const BASE_URL = "https://rusty-c22o.onrender.com";
+            let allProducts = [];
+            let filteredProducts = [];
+            let sortCol = 'id';
+            let sortDesc = true;
+            let currentEditImages = [];
+            let selectedIds = new Set();
             
-            let currentPage = 1;[cite: 10]
-            const itemsPerPage = 50;[cite: 10]
+            let currentPage = 1;
+            const itemsPerPage = 50;
 
             // 🔥 STATUS PEKERJAAN (Untuk Lock Tab Browser)
             let isSystemBusy = false;
@@ -370,118 +369,118 @@
 
             function escapeHTML(str) {
                 if (!str) return '';
-                return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));[cite: 10]
+                return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
             }
 
             function safeURL(url) {
-                if (!url) return 'https://placehold.co/100x100/e0e5ec/a3b1c6?text=Image';[cite: 10]
-                let strUrl = typeof url === 'string' ? url.trim() : JSON.stringify(url);[cite: 10]
-                if (strUrl === '') return 'https://placehold.co/100x100/e0e5ec/a3b1c6?text=Image';[cite: 10]
+                if (!url) return 'https://placehold.co/100x100/e0e5ec/a3b1c6?text=Image';
+                let strUrl = typeof url === 'string' ? url.trim() : JSON.stringify(url);
+                if (strUrl === '') return 'https://placehold.co/100x100/e0e5ec/a3b1c6?text=Image';
                 try {
-                    if (strUrl.startsWith('[') || strUrl.startsWith('{')) {[cite: 10]
-                        const parsed = JSON.parse(strUrl);[cite: 10]
-                        if (Array.isArray(parsed) && parsed.length > 0) { strUrl = String(parsed[0]).trim(); }[cite: 10]
+                    if (strUrl.startsWith('[') || strUrl.startsWith('{')) {
+                        const parsed = JSON.parse(strUrl);
+                        if (Array.isArray(parsed) && parsed.length > 0) { strUrl = String(parsed[0]).trim(); }
                     }
                 } catch(e) {}
-                strUrl = strUrl.replace(/^["']|["']$/g, '');[cite: 10]
-                if (strUrl.startsWith('http://') || strUrl.startsWith('https://') || strUrl.startsWith('data:image')) { return escapeHTML(strUrl); }[cite: 10]
-                if (strUrl.startsWith('/')) { return escapeHTML(BASE_URL + strUrl); }[cite: 10]
-                return escapeHTML(BASE_URL + '/' + strUrl);[cite: 10]
+                strUrl = strUrl.replace(/^["']|["']$/g, '');
+                if (strUrl.startsWith('http://') || strUrl.startsWith('https://') || strUrl.startsWith('data:image')) { return escapeHTML(strUrl); }
+                if (strUrl.startsWith('/')) { return escapeHTML(BASE_URL + strUrl); }
+                return escapeHTML(BASE_URL + '/' + strUrl);
             }
 
             function formatRupiah(num) {
-                let parsed = parseInt(num) || 0;[cite: 10]
-                return "Rp " + parsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");[cite: 10]
+                let parsed = parseInt(num) || 0;
+                return "Rp " + parsed.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
             }
 
             function showNotification(title, message, type) {
-                const notifModal = document.getElementById('notificationModal');[cite: 10]
-                const notifIcon = document.getElementById('notifIcon');[cite: 10]
-                const notifTitle = document.getElementById('notifTitle');[cite: 10]
-                const notifMessage = document.getElementById('notifMessage');[cite: 10]
-                const notifBtn = document.getElementById('notifBtn');[cite: 10]
+                const notifModal = document.getElementById('notificationModal');
+                const notifIcon = document.getElementById('notifIcon');
+                const notifTitle = document.getElementById('notifTitle');
+                const notifMessage = document.getElementById('notifMessage');
+                const notifBtn = document.getElementById('notifBtn');
 
                 if(type === 'success') {
-                    notifIcon.innerHTML = '<i class="fas fa-check-circle" style="color: #22c55e;"></i>';[cite: 10]
-                    notifTitle.style.color = '#22c55e';[cite: 10]
+                    notifIcon.innerHTML = '<i class="fas fa-check-circle" style="color: #22c55e;"></i>';
+                    notifTitle.style.color = '#22c55e';
                 } else if(type === 'error') {
-                    notifIcon.innerHTML = '<i class="fas fa-times-circle" style="color: #ef4444;"></i>';[cite: 10]
-                    notifTitle.style.color = '#ef4444';[cite: 10]
+                    notifIcon.innerHTML = '<i class="fas fa-times-circle" style="color: #ef4444;"></i>';
+                    notifTitle.style.color = '#ef4444';
                 } else {
-                    notifIcon.innerHTML = '<i class="fas fa-info-circle" style="color: #3b82f6;"></i>';[cite: 10]
-                    notifTitle.style.color = '#3b82f6';[cite: 10]
+                    notifIcon.innerHTML = '<i class="fas fa-info-circle" style="color: #3b82f6;"></i>';
+                    notifTitle.style.color = '#3b82f6';
                 }
 
-                notifTitle.textContent = String(title);[cite: 10]
-                notifMessage.textContent = String(message);[cite: 10]
-                notifBtn.onclick = function() { notifModal.classList.remove('active'); };[cite: 10]
-                notifModal.classList.add('active');[cite: 10]
+                notifTitle.textContent = String(title);
+                notifMessage.textContent = String(message);
+                notifBtn.onclick = function() { notifModal.classList.remove('active'); };
+                notifModal.classList.add('active');
             }
 
-            // 🔥 LOGIKA UNTUK MENAMPILKAN/MENYEMBUNYIKAN TOMBOL CLEAR SEARCH[cite: 10]
+            // 🔥 LOGIKA UNTUK MENAMPILKAN/MENYEMBUNYIKAN TOMBOL CLEAR SEARCH
             Object.defineProperty(window, 'toggleClearButton', {
                 value: function() {
-                    const input = document.getElementById('searchInput');[cite: 10]
-                    const btn = document.getElementById('clearSearchBtn');[cite: 10]
+                    const input = document.getElementById('searchInput');
+                    const btn = document.getElementById('clearSearchBtn');
                     if (input.value.length > 0) {
-                        btn.classList.remove('hidden');[cite: 10]
+                        btn.classList.remove('hidden');
                     } else {
-                        btn.classList.add('hidden');[cite: 10]
+                        btn.classList.add('hidden');
                     }
-                }, writable: false, configurable: false[cite: 10]
+                }, writable: false, configurable: false
             });
 
-            // 🔥 LOGIKA UNTUK MENGHAPUS TEKS PENCARIAN[cite: 10]
+            // 🔥 LOGIKA UNTUK MENGHAPUS TEKS PENCARIAN
             Object.defineProperty(window, 'clearSearch', {
                 value: function() {
-                    const input = document.getElementById('searchInput');[cite: 10]
-                    input.value = '';[cite: 10]
-                    window.toggleClearButton();[cite: 10]
-                    window.applyFilterAndSort();[cite: 10]
-                    input.focus(); // Mengembalikan kursor ke kolom pencarian[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    const input = document.getElementById('searchInput');
+                    input.value = '';
+                    window.toggleClearButton();
+                    window.applyFilterAndSort();
+                    input.focus(); 
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'togglePromoInput', {
                 value: function() {
-                    const isChecked = document.getElementById('editProdIsPromo').checked;[cite: 10]
-                    const promoInput = document.getElementById('editProdPromoPrice');[cite: 10]
+                    const isChecked = document.getElementById('editProdIsPromo').checked;
+                    const promoInput = document.getElementById('editProdPromoPrice');
                     if (isChecked) {
-                        promoInput.disabled = false;[cite: 10]
-                        promoInput.style.opacity = '1';[cite: 10]
-                        promoInput.focus();[cite: 10]
+                        promoInput.disabled = false;
+                        promoInput.style.opacity = '1';
+                        promoInput.focus();
                     } else {
-                        promoInput.disabled = true;[cite: 10]
-                        promoInput.style.opacity = '0.5';[cite: 10]
-                        promoInput.value = '0';[cite: 10]
+                        promoInput.disabled = true;
+                        promoInput.style.opacity = '0.5';
+                        promoInput.value = '0';
                     }
-                }, writable: false, configurable: false[cite: 10]
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'toggleBulkPromo', {
                 value: function(checkbox) {
-                    const container = checkbox.closest('.bulk-item');[cite: 10]
-                    const promoInput = container.querySelector('.bulk-promo');[cite: 10]
+                    const container = checkbox.closest('.bulk-item');
+                    const promoInput = container.querySelector('.bulk-promo');
                     if (checkbox.checked) {
-                        promoInput.disabled = false;[cite: 10]
-                        promoInput.style.opacity = '1';[cite: 10]
+                        promoInput.disabled = false;
+                        promoInput.style.opacity = '1';
                     } else {
-                        promoInput.disabled = true;[cite: 10]
-                        promoInput.style.opacity = '0.5';[cite: 10]
-                        promoInput.value = '0';[cite: 10]
+                        promoInput.disabled = true;
+                        promoInput.style.opacity = '0.5';
+                        promoInput.value = '0';
                     }
-                }, writable: false, configurable: false[cite: 10]
+                }, writable: false, configurable: false
             });
 
             async function loadCatalog() {
                 try {
-                    const response = await fetch(`${BASE_URL}/api/admin/catalog`, {[cite: 10]
-                        headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-store' }[cite: 10]
+                    const response = await fetch(`${BASE_URL}/api/admin/catalog`, {
+                        headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-store' }
                     });
-                    if (!response.ok) throw new Error("Gagal mengambil data katalog Admin.");[cite: 10]
+                    if (!response.ok) throw new Error("Gagal mengambil data katalog Admin.");
                     
-                    allProducts = await response.json();[cite: 10]
-                    window.applyFilterAndSort(); [cite: 10]
+                    allProducts = await response.json();
+                    window.applyFilterAndSort(); 
                 } catch (error) {
                     document.getElementById('catalogTableBody').innerHTML = `
                         <tr><td colspan="7" class="p-12 text-center text-rose-500">
@@ -489,104 +488,104 @@
                             <p class="font-bold">Koneksi Database Terputus</p>
                             <p class="text-xs mt-1">${escapeHTML(error.message)}</p>
                         </td></tr>
-                    `;[cite: 10]
+                    `;
                 }
             }
 
             Object.defineProperty(window, 'toggleRow', {
                 value: function(id, isChecked) {
-                    if (isChecked) selectedIds.add(String(id));[cite: 10]
-                    else selectedIds.delete(String(id));[cite: 10]
-                    updateBulkButton();[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    if (isChecked) selectedIds.add(String(id));
+                    else selectedIds.delete(String(id));
+                    updateBulkButton();
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'toggleAll', {
                 value: function(isChecked) {
-                    const cbs = document.querySelectorAll('.row-cb');[cite: 10]
+                    const cbs = document.querySelectorAll('.row-cb');
                     cbs.forEach(cb => {
-                        cb.checked = isChecked;[cite: 10]
-                        if (isChecked) selectedIds.add(String(cb.value));[cite: 10]
-                        else selectedIds.delete(String(cb.value));[cite: 10]
+                        cb.checked = isChecked;
+                        if (isChecked) selectedIds.add(String(cb.value));
+                        else selectedIds.delete(String(cb.value));
                     });
-                    updateBulkButton();[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    updateBulkButton();
+                }, writable: false, configurable: false
             });
 
             function updateBulkButton() {
-                const btnEdit = document.getElementById('btnBulkEdit');[cite: 10]
-                const btnDelete = document.getElementById('btnBulkDelete');[cite: 10]
+                const btnEdit = document.getElementById('btnBulkEdit');
+                const btnDelete = document.getElementById('btnBulkDelete');
                 
-                document.getElementById('bulkCount').innerText = selectedIds.size;[cite: 10]
-                document.getElementById('bulkDeleteCount').innerText = selectedIds.size;[cite: 10]
+                document.getElementById('bulkCount').innerText = selectedIds.size;
+                document.getElementById('bulkDeleteCount').innerText = selectedIds.size;
                 
                 if (selectedIds.size > 0) {
-                    btnEdit.classList.remove('hidden');[cite: 10]
-                    btnDelete.classList.remove('hidden');[cite: 10]
+                    btnEdit.classList.remove('hidden');
+                    btnDelete.classList.remove('hidden');
                 } else {
-                    btnEdit.classList.add('hidden');[cite: 10]
-                    btnDelete.classList.add('hidden');[cite: 10]
-                    document.getElementById('selectAllCb').checked = false;[cite: 10]
+                    btnEdit.classList.add('hidden');
+                    btnDelete.classList.add('hidden');
+                    document.getElementById('selectAllCb').checked = false;
                 }
             }
 
             Object.defineProperty(window, 'openBulkDeleteModal', {
                 value: function() {
-                    document.getElementById('bulkDeleteTextCount').innerText = selectedIds.size;[cite: 10]
-                    document.getElementById('bulkDeleteModal').classList.add('active');[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    document.getElementById('bulkDeleteTextCount').innerText = selectedIds.size;
+                    document.getElementById('bulkDeleteModal').classList.add('active');
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'closeBulkDeleteModal', {
-                value: function() { document.getElementById('bulkDeleteModal').classList.remove('active'); }, writable: false, configurable: false[cite: 10]
+                value: function() { document.getElementById('bulkDeleteModal').classList.remove('active'); }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'executeBulkDelete', {
                 value: async function() {
-                    const btn = document.getElementById('btnExecuteBulkDelete');[cite: 10]
-                    const originalText = btn.innerHTML;[cite: 10]
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';[cite: 10]
-                    btn.disabled = true;[cite: 10]
+                    const btn = document.getElementById('btnExecuteBulkDelete');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menghapus...';
+                    btn.disabled = true;
 
-                    let successCount = 0; let failCount = 0;[cite: 10]
+                    let successCount = 0; let failCount = 0;
                     
-                    const promises = Array.from(selectedIds).map(async (id) => {[cite: 10]
+                    const promises = Array.from(selectedIds).map(async (id) => {
                         try {
-                            const response = await fetch(`${BASE_URL}/api/admin/catalog/${id}`, {[cite: 10]
-                                method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }[cite: 10]
+                            const response = await fetch(`${BASE_URL}/api/admin/catalog/${id}`, {
+                                method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
                             });
-                            if (!response.ok) throw new Error("Gagal");[cite: 10]
-                            successCount++;[cite: 10]
-                        } catch (e) { failCount++; }[cite: 10]
+                            if (!response.ok) throw new Error("Gagal");
+                            successCount++;
+                        } catch (e) { failCount++; }
                     });
 
-                    await Promise.all(promises);[cite: 10]
+                    await Promise.all(promises);
 
-                    btn.innerHTML = originalText; btn.disabled = false;[cite: 10]
-                    window.closeBulkDeleteModal();[cite: 10]
+                    btn.innerHTML = originalText; btn.disabled = false;
+                    window.closeBulkDeleteModal();
                     
-                    if (failCount === 0) showNotification("Berhasil", `${successCount} produk telah dihapus secara permanen.`, "success");[cite: 10]
-                    else showNotification("Peringatan", `${successCount} berhasil dihapus, ${failCount} gagal dihapus.`, "warning");[cite: 10]
+                    if (failCount === 0) showNotification("Berhasil", `${successCount} produk telah dihapus secara permanen.`, "success");
+                    else showNotification("Peringatan", `${successCount} berhasil dihapus, ${failCount} gagal dihapus.`, "warning");
                     
-                    selectedIds.clear(); [cite: 10]
-                    updateBulkButton();[cite: 10]
-                    document.getElementById('selectAllCb').checked = false;[cite: 10]
-                    loadCatalog(); [cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    selectedIds.clear(); 
+                    updateBulkButton();
+                    document.getElementById('selectAllCb').checked = false;
+                    loadCatalog(); 
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'openBulkEditModal', {
                 value: function() {
-                    const container = document.getElementById('bulkEditContainer');[cite: 10]
-                    container.innerHTML = '';[cite: 10]
+                    const container = document.getElementById('bulkEditContainer');
+                    container.innerHTML = '';
                     
-                    selectedIds.forEach(id => {[cite: 10]
-                        const prod = allProducts.find(p => String(p.id) === id);[cite: 10]
+                    selectedIds.forEach(id => {
+                        const prod = allProducts.find(p => String(p.id) === id);
                         if (prod) {
-                            const isPromoChecked = prod.is_promo == 1 || prod.is_promo === true;[cite: 10]
-                            const div = document.createElement('div');[cite: 10]
-                            div.className = 'p-4 bg-white border border-gray-200 rounded-xl mb-3 shadow-sm bulk-item transition hover:border-blue-300';[cite: 10]
-                            div.dataset.id = prod.id;[cite: 10]
+                            const isPromoChecked = prod.is_promo == 1 || prod.is_promo === true;
+                            const div = document.createElement('div');
+                            div.className = 'p-4 bg-white border border-gray-200 rounded-xl mb-3 shadow-sm bulk-item transition hover:border-blue-300';
+                            div.dataset.id = prod.id;
                             div.innerHTML = `
                                 <div class="font-bold text-slate-700 mb-3 border-b border-gray-100 pb-2 flex justify-between items-center">
                                     <span class="truncate flex-1 text-sm"><i class="fas fa-box text-blue-500 mr-2"></i>${escapeHTML(prod.title || prod.name || 'Produk')}</span>
@@ -617,52 +616,52 @@
                                         <label class="toggle-label block overflow-hidden h-4 rounded-full bg-gray-300 cursor-pointer transition-colors"></label>
                                     </div>
                                 </div>
-                            `;[cite: 10]
-                            container.appendChild(div);[cite: 10]
+                            `;
+                            container.appendChild(div);
                         }
                     });
-                    document.getElementById('bulkEditModal').classList.add('active');[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    document.getElementById('bulkEditModal').classList.add('active');
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'closeBulkEditModal', {
-                value: function() { document.getElementById('bulkEditModal').classList.remove('active'); }, writable: false, configurable: false[cite: 10]
+                value: function() { document.getElementById('bulkEditModal').classList.remove('active'); }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'saveBulkEdit', {
                 value: async function() {
-                    const items = document.querySelectorAll('.bulk-item');[cite: 10]
-                    const btn = document.getElementById('btnSaveBulkEdit');[cite: 10]
-                    const originalText = btn.innerHTML;[cite: 10]
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses ke Server...';[cite: 10]
-                    btn.disabled = true;[cite: 10]
+                    const items = document.querySelectorAll('.bulk-item');
+                    const btn = document.getElementById('btnSaveBulkEdit');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses ke Server...';
+                    btn.disabled = true;
 
-                    let successCount = 0; let failCount = 0;[cite: 10]
+                    let successCount = 0; let failCount = 0;
 
-                    const promises = Array.from(items).map(async (item) => {[cite: 10]
-                        const id = item.dataset.id;[cite: 10]
-                        const prod = allProducts.find(p => String(p.id) === id);[cite: 10]
+                    const promises = Array.from(items).map(async (item) => {
+                        const id = item.dataset.id;
+                        const prod = allProducts.find(p => String(p.id) === id);
                         
-                        const price = Number(item.querySelector('.bulk-price').value);[cite: 10]
-                        const is_promo = item.querySelector('.bulk-ispromo').checked ? 1 : 0;[cite: 10]
-                        const promo_price = is_promo ? Number(item.querySelector('.bulk-promo').value) : 0;[cite: 10]
-                        const quantity = Number(item.querySelector('.bulk-stock').value);[cite: 10]
-                        const category = item.querySelector('.bulk-category').value;[cite: 10]
+                        const price = Number(item.querySelector('.bulk-price').value);
+                        const is_promo = item.querySelector('.bulk-ispromo').checked ? 1 : 0;
+                        const promo_price = is_promo ? Number(item.querySelector('.bulk-promo').value) : 0;
+                        const quantity = Number(item.querySelector('.bulk-stock').value);
+                        const category = item.querySelector('.bulk-category').value;
 
-                        let validFilters = "{}";[cite: 10]
-                        if (typeof prod.filters === 'object') validFilters = JSON.stringify(prod.filters);[cite: 10]
-                        else if (typeof prod.filters === 'string' && prod.filters.trim() !== '') validFilters = prod.filters;[cite: 10]
+                        let validFilters = "{}";
+                        if (typeof prod.filters === 'object') validFilters = JSON.stringify(prod.filters);
+                        else if (typeof prod.filters === 'string' && prod.filters.trim() !== '') validFilters = prod.filters;
 
-                        let imgString = "[]";[cite: 10]
-                        let imgRaw = prod.image_url || prod.image || prod.img || '';[cite: 10]
-                        if (typeof imgRaw === 'string') {[cite: 10]
+                        let imgString = "[]";
+                        let imgRaw = prod.image_url || prod.image || prod.img || '';
+                        if (typeof imgRaw === 'string') {
                             try {
-                                if (imgRaw.startsWith('[') || imgRaw.startsWith('{')) {[cite: 10]
-                                    const parsed = JSON.parse(imgRaw);[cite: 10]
-                                    if (Array.isArray(parsed)) imgString = JSON.stringify(parsed.map(u => String(u)));[cite: 10]
-                                } else if (imgRaw.trim() !== '') { imgString = JSON.stringify([imgRaw.trim()]); }[cite: 10]
-                            } catch(e) { if (imgRaw.trim() !== '') imgString = JSON.stringify([imgRaw.trim()]); }[cite: 10]
-                        } else if (Array.isArray(imgRaw)) { imgString = JSON.stringify(imgRaw.map(u => String(u))); }[cite: 10]
+                                if (imgRaw.startsWith('[') || imgRaw.startsWith('{')) {
+                                    const parsed = JSON.parse(imgRaw);
+                                    if (Array.isArray(parsed)) imgString = JSON.stringify(parsed.map(u => String(u)));
+                                } else if (imgRaw.trim() !== '') { imgString = JSON.stringify([imgRaw.trim()]); }
+                            } catch(e) { if (imgRaw.trim() !== '') imgString = JSON.stringify([imgRaw.trim()]); }
+                        } else if (Array.isArray(imgRaw)) { imgString = JSON.stringify(imgRaw.map(u => String(u))); }
 
                         const payload = {
                             title: prod.title || prod.name || '',
@@ -672,345 +671,342 @@
                         };
 
                         try {
-                            const response = await fetch(`${BASE_URL}/api/admin/catalog/${id}`, {[cite: 10]
-                                method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },[cite: 10]
-                                body: JSON.stringify(payload)[cite: 10]
+                            const response = await fetch(`${BASE_URL}/api/admin/catalog/${id}`, {
+                                method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                body: JSON.stringify(payload)
                             });
-                            if (!response.ok) throw new Error("Gagal");[cite: 10]
-                            successCount++;[cite: 10]
-                        } catch (e) { failCount++; }[cite: 10]
+                            if (!response.ok) throw new Error("Gagal");
+                            successCount++;
+                        } catch (e) { failCount++; }
                     });
 
-                    await Promise.all(promises);[cite: 10]
+                    await Promise.all(promises);
 
-                    btn.innerHTML = originalText; btn.disabled = false;[cite: 10]
-                    window.closeBulkEditModal();[cite: 10]
+                    btn.innerHTML = originalText; btn.disabled = false;
+                    window.closeBulkEditModal();
                     
-                    if (failCount === 0) showNotification("Selesai", `${successCount} produk berhasil diperbarui secara massal!`, "success");[cite: 10]
-                    else showNotification("Peringatan", `${successCount} sukses, ${failCount} gagal diperbarui.`, "warning");[cite: 10]
+                    if (failCount === 0) showNotification("Selesai", `${successCount} produk berhasil diperbarui secara massal!`, "success");
+                    else showNotification("Peringatan", `${successCount} sukses, ${failCount} gagal diperbarui.`, "warning");
                     
-                    selectedIds.clear(); updateBulkButton();[cite: 10]
-                    document.getElementById('selectAllCb').checked = false;[cite: 10]
-                    loadCatalog(); [cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    selectedIds.clear(); updateBulkButton();
+                    document.getElementById('selectAllCb').checked = false;
+                    loadCatalog(); 
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'exportToExcel', {
                 value: function() {
-                    if (allProducts.length === 0) {[cite: 10]
-                        showNotification("Data Kosong", "Tidak ada produk untuk diekspor.", "warning");[cite: 10]
+                    if (allProducts.length === 0) {
+                        showNotification("Data Kosong", "Tidak ada produk untuk diekspor.", "warning");
                         return;
                     }
-                    const dataToExport = allProducts.map(p => {[cite: 10]
+                    const dataToExport = allProducts.map(p => {
                         
-                        let filterArr = [];[cite: 10]
+                        let filterArr = [];
                         try {
-                            let fObj = typeof p.filters === 'string' ? JSON.parse(p.filters) : (p.filters || {});[cite: 10]
+                            let fObj = typeof p.filters === 'string' ? JSON.parse(p.filters) : (p.filters || {});
                             for (let k in fObj) {
-                                let val = fObj[k];[cite: 10]
-                                if (Array.isArray(val)) val = val.join(', '); [cite: 10]
-                                filterArr.push(`${k}=${val}`);[cite: 10]
+                                let val = fObj[k];
+                                if (Array.isArray(val)) val = val.join(', '); 
+                                filterArr.push(`${k}=${val}`);
                             }
                         } catch(e) {}
-                        let humanFilter = filterArr.join(' | ');[cite: 10]
+                        let humanFilter = filterArr.join(' | ');
 
-                        let imgArr = [];[cite: 10]
-                        let rawImg = p.image_url || p.image || p.img || '';[cite: 10]
-                        if (typeof rawImg === 'string') {[cite: 10]
+                        let imgArr = [];
+                        let rawImg = p.image_url || p.image || p.img || '';
+                        if (typeof rawImg === 'string') {
                             try {
-                                if (rawImg.startsWith('[') || rawImg.startsWith('{')) {[cite: 10]
-                                    const parsed = JSON.parse(rawImg);[cite: 10]
-                                    if (Array.isArray(parsed)) imgArr = parsed;[cite: 10]
-                                    else imgArr = [rawImg];[cite: 10]
-                                } else if (rawImg.trim() !== '') { imgArr = [rawImg.trim()]; }[cite: 10]
-                            } catch(e) { if (rawImg.trim() !== '') imgArr = [rawImg.trim()]; }[cite: 10]
-                        } else if (Array.isArray(rawImg)) { imgArr = rawImg; }[cite: 10]
+                                if (rawImg.startsWith('[') || rawImg.startsWith('{')) {
+                                    const parsed = JSON.parse(rawImg);
+                                    if (Array.isArray(parsed)) imgArr = parsed;
+                                    else imgArr = [rawImg];
+                                } else if (rawImg.trim() !== '') { imgArr = [rawImg.trim()]; }
+                            } catch(e) { if (rawImg.trim() !== '') imgArr = [rawImg.trim()]; }
+                        } else if (Array.isArray(rawImg)) { imgArr = rawImg; }
 
                         return {
-                            "[KUNCI] ID PRODUK (JANGAN DIUBAH)": p.id,[cite: 10]
-                            "Nama Produk": p.title || p.name || "",[cite: 10]
-                            "Kategori": p.category || "",[cite: 10]
-                            "Harga Asli": Number(p.price) || 0,[cite: 10]
-                            "Harga Diskon": Number(p.promo_price) || 0,[cite: 10]
-                            "Status Promo (Aktif/Tidak)": (p.is_promo == 1 || p.is_promo === true) ? "Aktif" : "Tidak",[cite: 10]
-                            "Stok Gudang": Number(p.quantity) || 0,[cite: 10]
-                            "Berat (Gram)": Number(p.weight) || 0,[cite: 10]
-                            "Info Tambahan": p.info || "",[cite: 10]
-                            "Deskripsi Produk": p.desc || "",[cite: 10]
-                            "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": humanFilter,[cite: 10]
-                            "Foto 1 (Utama)": imgArr[0] || "",[cite: 10]
-                            "Foto 2": imgArr[1] || "",[cite: 10]
-                            "Foto 3": imgArr[2] || "",[cite: 10]
-                            "Foto 4": imgArr[3] || "",[cite: 10]
-                            "Foto 5": imgArr[4] || "",[cite: 10]
-                            "Foto 6": imgArr[5] || "",[cite: 10]
-                            "Foto 7": imgArr[6] || "",[cite: 10]
-                            "Foto 8": imgArr[7] || "",[cite: 10]
-                            "Foto 9": imgArr[8] || ""[cite: 10]
+                            "[KUNCI] ID PRODUK (JANGAN DIUBAH)": p.id,
+                            "Nama Produk": p.title || p.name || "",
+                            "Kategori": p.category || "",
+                            "Harga Asli": Number(p.price) || 0,
+                            "Harga Diskon": Number(p.promo_price) || 0,
+                            "Status Promo (Aktif/Tidak)": (p.is_promo == 1 || p.is_promo === true) ? "Aktif" : "Tidak",
+                            "Stok Gudang": Number(p.quantity) || 0,
+                            "Berat (Gram)": Number(p.weight) || 0,
+                            "Info Tambahan": p.info || "",
+                            "Deskripsi Produk": p.desc || "",
+                            "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": humanFilter,
+                            "Foto 1 (Utama)": imgArr[0] || "",
+                            "Foto 2": imgArr[1] || "",
+                            "Foto 3": imgArr[2] || "",
+                            "Foto 4": imgArr[3] || "",
+                            "Foto 5": imgArr[4] || "",
+                            "Foto 6": imgArr[5] || "",
+                            "Foto 7": imgArr[6] || "",
+                            "Foto 8": imgArr[7] || "",
+                            "Foto 9": imgArr[8] || ""
                         };
                     });
 
                     dataToExport.push({
                         "[KUNCI] ID PRODUK (JANGAN DIUBAH)": "", 
-                        "Nama Produk": "[CONTOH TAMBAH BARU] Sabun Colek",[cite: 10]
-                        "Kategori": "Sabun",[cite: 10]
-                        "Harga Asli": 10000,[cite: 10]
-                        "Harga Diskon": 0,[cite: 10]
-                        "Status Promo (Aktif/Tidak)": "Tidak",[cite: 10]
-                        "Stok Gudang": 50,[cite: 10]
-                        "Berat (Gram)": 200,[cite: 10]
-                        "Info Tambahan": "Min. Order: 5",[cite: 10]
-                        "Deskripsi Produk": "Ini adalah contoh menambah data baru. Biarkan ID Kosong.",[cite: 10]
-                        "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Warna=Putih | Varian=Ekstrak Lemon",[cite: 10]
-                        "Foto 1 (Utama)": "https://i.ibb.co.com/contoh1.jpg",[cite: 10]
-                        "Foto 2": "https://i.ibb.co.com/contoh2.jpg",[cite: 10]
-                        "Foto 3": "", "Foto 4": "", "Foto 5": "", "Foto 6": "", "Foto 7": "", "Foto 8": "", "Foto 9": ""[cite: 10]
+                        "Nama Produk": "[CONTOH TAMBAH BARU] Sabun Colek",
+                        "Kategori": "Sabun",
+                        "Harga Asli": 10000,
+                        "Harga Diskon": 0,
+                        "Status Promo (Aktif/Tidak)": "Tidak",
+                        "Stok Gudang": 50,
+                        "Berat (Gram)": 200,
+                        "Info Tambahan": "Min. Order: 5",
+                        "Deskripsi Produk": "Ini adalah contoh menambah data baru. Biarkan ID Kosong.",
+                        "Atribut Produk (Cth: Warna=Merah | Ukuran=XL)": "Warna=Putih | Varian=Ekstrak Lemon",
+                        "Foto 1 (Utama)": "https://i.ibb.co.com/contoh1.jpg",
+                        "Foto 2": "https://i.ibb.co.com/contoh2.jpg",
+                        "Foto 3": "", "Foto 4": "", "Foto 5": "", "Foto 6": "", "Foto 7": "", "Foto 8": "", "Foto 9": ""
                     });
 
-                    const worksheet = XLSX.utils.json_to_sheet(dataToExport);[cite: 10]
-                    const workbook = XLSX.utils.book_new();[cite: 10]
-                    XLSX.utils.book_append_sheet(workbook, worksheet, "Katalog_Bakoel");[cite: 10]
-                    XLSX.writeFile(workbook, "Produk_Katalog_Bakoel.xlsx");[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+                    const workbook = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(workbook, worksheet, "Katalog_Bakoel");
+                    XLSX.writeFile(workbook, "Produk_Katalog_Bakoel.xlsx");
+                }, writable: false, configurable: false
             });
 
             // =========================================================================
             // 🔥 FUNGSI IMPORT MASSAL DARI EXCEL (SISTEM GELOMBANG ANTI-TIMEOUT)
-            // Mampu memproses 10.000+ data tanpa memicu DDoS lokal / Server Timeout
-            // Dilengkapi dengan Sistem Gembok Layar & Tab Browser[cite: 10]
             // =========================================================================
             Object.defineProperty(window, 'importFromExcel', {
                 value: async function(event) {
-                    const file = event.target.files[0];[cite: 10]
-                    if (!file) return;[cite: 10]
+                    const file = event.target.files[0];
+                    if (!file) return;
 
-                    const reader = new FileReader();[cite: 10]
-                    reader.onload = async function(e) {[cite: 10]
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
                         try {
-                            // MENGAKTIFKAN GEMBOK LAYAR[cite: 10]
-                            isSystemBusy = true;[cite: 10]
-                            document.body.style.pointerEvents = 'none'; // Lumpuhkan klik layar (Anti Interruption)[cite: 10]
-                            document.getElementById('excelLoadingModal').style.pointerEvents = 'auto'; // Biarkan modal aktif[cite: 10]
-                            document.getElementById('excelLoadingModal').classList.add('active');[cite: 10]
+                            isSystemBusy = true;
+                            document.body.style.pointerEvents = 'none';
+                            document.getElementById('excelLoadingModal').style.pointerEvents = 'auto';
+                            document.getElementById('excelLoadingModal').classList.add('active');
 
-                            const data = new Uint8Array(e.target.result);[cite: 10]
-                            const workbook = XLSX.read(data, {type: 'array'});[cite: 10]
+                            const data = new Uint8Array(e.target.result);
+                            const workbook = XLSX.read(data, {type: 'array'});
                             
-                            let targetSheetName = workbook.SheetNames.find(name => name.includes("Upload"));[cite: 10]
-                            if (!targetSheetName) targetSheetName = workbook.SheetNames[workbook.SheetNames.length - 1];[cite: 10]
+                            let targetSheetName = workbook.SheetNames.find(name => name.includes("Upload"));
+                            if (!targetSheetName) targetSheetName = workbook.SheetNames[workbook.SheetNames.length - 1];
                             
-                            const worksheet = workbook.Sheets[targetSheetName];[cite: 10]
-                            const jsonData = XLSX.utils.sheet_to_json(worksheet);[cite: 10]
+                            const worksheet = workbook.Sheets[targetSheetName];
+                            const jsonData = XLSX.utils.sheet_to_json(worksheet);
                             
-                            let successCount = 0; let failCount = 0; let insertCount = 0;[cite: 10]
-                            const totalData = jsonData.length;[cite: 10]
+                            let successCount = 0; let failCount = 0; let insertCount = 0;
+                            const totalData = jsonData.length;
                             
-                            const chunkSize = 4; // Pengiriman Gelombang (Mencegah Timeout 15 Detik & OOM Backend)[cite: 10]
+                            const chunkSize = 4;
 
-                            for (let i = 0; i < totalData; i += chunkSize) {[cite: 10]
-                                const chunk = jsonData.slice(i, i + chunkSize);[cite: 10]
+                            for (let i = 0; i < totalData; i += chunkSize) {
+                                const chunk = jsonData.slice(i, i + chunkSize);
                                 
                                 document.getElementById('excelLoadingText').innerHTML = `
                                     Memproses Gelombang: <b class="text-blue-600">${Math.min(i + chunkSize, totalData)}</b> dari <b class="text-slate-700">${totalData}</b> Produk...
                                     <br><span class="text-[10px] text-rose-500 mt-2 block font-bold"><i class="fas fa-hand-paper"></i> Dilarang menutup atau me-refresh halaman ini!</span>
-                                `;[cite: 10]
+                                `;
 
-                                const uploadPromises = chunk.map(async (row) => {[cite: 10]
-                                    if (row["Nama Produk"] && row["Nama Produk"].includes("[CONTOH TAMBAH BARU]")) return;[cite: 10]
-                                    if (!row["Nama Produk"] || String(row["Nama Produk"]).trim() === "") return;[cite: 10]
+                                const uploadPromises = chunk.map(async (row) => {
+                                    if (row["Nama Produk"] && row["Nama Produk"].includes("[CONTOH TAMBAH BARU]")) return;
+                                    if (!row["Nama Produk"] || String(row["Nama Produk"]).trim() === "") return;
                                     
-                                    const productId = row["[KUNCI] ID PRODUK (JANGAN DIUBAH)"] ? String(row["[KUNCI] ID PRODUK (JANGAN DIUBAH)"]).trim() : "";[cite: 10]
+                                    const productId = row["[KUNCI] ID PRODUK (JANGAN DIUBAH)"] ? String(row["[KUNCI] ID PRODUK (JANGAN DIUBAH)"]).trim() : "";
                                     
-                                    const isPromoStr = String(row["Status Promo (Aktif/Tidak)"] || "").toLowerCase().trim();[cite: 10]
-                                    const isPromo = (isPromoStr === "aktif" || isPromoStr === "ya" || isPromoStr === "1") ? 1 : 0;[cite: 10]
-                                    const promoPrice = isPromo === 1 ? (Number(row["Harga Diskon"]) || 0) : 0;[cite: 10]
+                                    const isPromoStr = String(row["Status Promo (Aktif/Tidak)"] || "").toLowerCase().trim();
+                                    const isPromo = (isPromoStr === "aktif" || isPromoStr === "ya" || isPromoStr === "1") ? 1 : 0;
+                                    const promoPrice = isPromo === 1 ? (Number(row["Harga Diskon"]) || 0) : 0;
 
-                                    let newImgArr = [];[cite: 10]
-                                    for (let j = 1; j <= 9; j++) {[cite: 10]
-                                        let colName = j === 1 ? "Foto 1 (Utama)" : `Foto ${j}`;[cite: 10]
-                                        if (row[colName] && String(row[colName]).trim() !== "") {[cite: 10]
-                                            newImgArr.push(String(row[colName]).trim());[cite: 10]
+                                    let newImgArr = [];
+                                    for (let j = 1; j <= 9; j++) {
+                                        let colName = j === 1 ? "Foto 1 (Utama)" : `Foto ${j}`;
+                                        if (row[colName] && String(row[colName]).trim() !== "") {
+                                            newImgArr.push(String(row[colName]).trim());
                                         }
                                     }
-                                    const payloadImg = JSON.stringify(newImgArr);[cite: 10]
+                                    const payloadImg = JSON.stringify(newImgArr);
 
-                                    let rawFilter = row["Atribut Produk (Cth: Warna=Merah | Ukuran=XL)"] || "";[cite: 10]
-                                    let filterObj = {};[cite: 10]
-                                    if (rawFilter.trim() !== "") {[cite: 10]
-                                        rawFilter.split('|').forEach(pair => {[cite: 10]
-                                            let parts = pair.split('=');[cite: 10]
-                                            if (parts.length >= 2) {[cite: 10]
-                                                let k = parts[0].trim();[cite: 10]
-                                                let v = parts.slice(1).join('=').trim();  [cite: 10]
-                                                filterObj[k] = v.split(',').map(s => s.trim()).filter(s => s !== '');[cite: 10]
+                                    let rawFilter = row["Atribut Produk (Cth: Warna=Merah | Ukuran=XL)"] || "";
+                                    let filterObj = {};
+                                    if (rawFilter.trim() !== "") {
+                                        rawFilter.split('|').forEach(pair => {
+                                            let parts = pair.split('=');
+                                            if (parts.length >= 2) {
+                                                let k = parts[0].trim();
+                                                let v = parts.slice(1).join('=').trim(); 
+                                                filterObj[k] = v.split(',').map(s => s.trim()).filter(s => s !== '');
                                             }
                                         });
                                     }
-                                    const payloadFilter = JSON.stringify(filterObj);[cite: 10]
+                                    const payloadFilter = JSON.stringify(filterObj);
 
                                     const payload = {
-                                        title: String(row["Nama Produk"]).trim(),[cite: 10]
-                                        price: Number(row["Harga Asli"]) || 0,[cite: 10]
-                                        quantity: Number(row["Stok Gudang"]) || 0,[cite: 10]
-                                        is_promo: isPromo,[cite: 10]
-                                        promo_price: promoPrice,[cite: 10]
-                                        image_url: payloadImg,[cite: 10]
-                                        desc: row["Deskripsi Produk"] || "",[cite: 10]
-                                        category: row["Kategori"] || "",[cite: 10]
-                                        info: row["Info Tambahan"] || "",[cite: 10]
-                                        filters: payloadFilter,[cite: 10]
-                                        weight: Number(row["Berat (Gram)"]) || 0[cite: 10]
+                                        title: String(row["Nama Produk"]).trim(),
+                                        price: Number(row["Harga Asli"]) || 0,
+                                        quantity: Number(row["Stok Gudang"]) || 0,
+                                        is_promo: isPromo,
+                                        promo_price: promoPrice,
+                                        image_url: payloadImg,
+                                        desc: row["Deskripsi Produk"] || "",
+                                        category: row["Kategori"] || "",
+                                        info: row["Info Tambahan"] || "",
+                                        filters: payloadFilter,
+                                        weight: Number(row["Berat (Gram)"]) || 0
                                     };
 
-                                    if (productId !== "") {[cite: 10]
-                                        const res = await fetch(`${BASE_URL}/api/admin/catalog/${productId}`, {[cite: 10]
-                                            method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },[cite: 10]
-                                            body: JSON.stringify(payload)[cite: 10]
+                                    if (productId !== "") {
+                                        const res = await fetch(`${BASE_URL}/api/admin/catalog/${productId}`, {
+                                            method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                            body: JSON.stringify(payload)
                                         });
-                                        if (res.ok) successCount++; else failCount++;[cite: 10]
+                                        if (res.ok) successCount++; else failCount++;
                                     } 
-                                    else if (payload.title !== "") {[cite: 10]
-                                        const res = await fetch(`${BASE_URL}/api/admin/catalog`, {[cite: 10]
-                                            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },[cite: 10]
-                                            body: JSON.stringify(payload)[cite: 10]
+                                    else if (payload.title !== "") {
+                                        const res = await fetch(`${BASE_URL}/api/admin/catalog`, {
+                                            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                            body: JSON.stringify(payload)
                                         });
-                                        if (res.ok) insertCount++; else failCount++;[cite: 10]
+                                        if (res.ok) insertCount++; else failCount++;
                                     }
                                 });
 
-                                await Promise.allSettled(uploadPromises);[cite: 10]
-                                await new Promise(resolve => setTimeout(resolve, 50));[cite: 10]
+                                await Promise.allSettled(uploadPromises);
+                                await new Promise(resolve => setTimeout(resolve, 50));
                             }
 
-                            document.getElementById('excelLoadingModal').classList.remove('active');[cite: 10]
-                            document.getElementById('excelLoadingText').innerText = "Menjahit data ke Database. Mohon tunggu..."; [cite: 10]
+                            document.getElementById('excelLoadingModal').classList.remove('active');
+                            document.getElementById('excelLoadingText').innerText = "Menjahit data ke Database. Mohon tunggu..."; 
                             
-                            if (successCount > 0 || insertCount > 0) {[cite: 10]
-                                showNotification("Upload Massal Sukses", `${successCount} produk diperbarui, ${insertCount} produk baru ditambahkan. ${failCount} gagal.`, failCount > 0 ? "warning" : "success");[cite: 10]
+                            if (successCount > 0 || insertCount > 0) {
+                                showNotification("Upload Massal Sukses", `${successCount} produk diperbarui, ${insertCount} produk baru ditambahkan. ${failCount} gagal.`, failCount > 0 ? "warning" : "success");
                             } else {
-                                showNotification("Upload Gagal", "Tidak ada data produk valid yang ditemukan di tab Excel tersebut.", "error");[cite: 10]
+                                showNotification("Upload Gagal", "Tidak ada data produk valid yang ditemukan di tab Excel tersebut.", "error");
                             }
-                            loadCatalog(); [cite: 10]
+                            loadCatalog(); 
+
                         } catch (error) {
-                            document.getElementById('excelLoadingModal').classList.remove('active');[cite: 10]
-                            document.getElementById('excelLoadingText').innerText = "Menjahit data ke Database. Mohon tunggu..."; [cite: 10]
-                            showNotification("Format Salah", "Pastikan Anda mengisi data di Tab '2. Upload_Produk' sesuai template.", "error");[cite: 10]
+                            document.getElementById('excelLoadingModal').classList.remove('active');
+                            document.getElementById('excelLoadingText').innerText = "Menjahit data ke Database. Mohon tunggu..."; 
+                            showNotification("Format Salah", "Pastikan Anda mengisi data di Tab '2. Upload_Produk' sesuai template.", "error");
                         } finally {
-                            // MEMBUKA GEMBOK LAYAR[cite: 10]
-                            isSystemBusy = false;[cite: 10]
-                            document.body.style.pointerEvents = 'auto'; // Kembalikan fungsionalitas klik[cite: 10]
+                            isSystemBusy = false;
+                            document.body.style.pointerEvents = 'auto'; 
                         }
                     };
-                    reader.readAsArrayBuffer(file);[cite: 10]
-                    event.target.value = '';[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    reader.readAsArrayBuffer(file);
+                    event.target.value = '';
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'handleSort', {
                 value: function(column) {
-                    if (sortCol === column) { sortDesc = !sortDesc; } else { sortCol = column; sortDesc = false; }[cite: 10]
-                    window.applyFilterAndSort();[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    if (sortCol === column) { sortDesc = !sortDesc; } else { sortCol = column; sortDesc = false; }
+                    window.applyFilterAndSort();
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'applyFilterAndSort', {
                 value: function() {
-                    const query = document.getElementById('searchInput').value.toLowerCase();[cite: 10]
-                    filteredProducts = allProducts.filter(p => {[cite: 10]
-                        const title = (p.title || p.name || '').toLowerCase();[cite: 10]
-                        const idStr = String(p.id).toLowerCase();[cite: 10]
-                        return title.includes(query) || idStr.includes(query);[cite: 10]
+                    const query = document.getElementById('searchInput').value.toLowerCase();
+                    filteredProducts = allProducts.filter(p => {
+                        const title = (p.title || p.name || '').toLowerCase();
+                        const idStr = String(p.id).toLowerCase();
+                        return title.includes(query) || idStr.includes(query);
                     });
 
-                    filteredProducts.sort((a, b) => {[cite: 10]
-                        let valA = a[sortCol]; let valB = b[sortCol];[cite: 10]
-                        if (sortCol === 'title') { valA = (a.title || a.name || '').toLowerCase(); valB = (b.title || b.name || '').toLowerCase(); } [cite: 10]
-                        else { valA = Number(valA) || 0; valB = Number(valB) || 0; }[cite: 10]
-                        if (valA < valB) return sortDesc ? 1 : -1;[cite: 10]
-                        if (valA > valB) return sortDesc ? -1 : 1;[cite: 10]
-                        return 0;[cite: 10]
+                    filteredProducts.sort((a, b) => {
+                        let valA = a[sortCol]; let valB = b[sortCol];
+                        if (sortCol === 'title') { valA = (a.title || a.name || '').toLowerCase(); valB = (b.title || b.name || '').toLowerCase(); } 
+                        else { valA = Number(valA) || 0; valB = Number(valB) || 0; }
+                        if (valA < valB) return sortDesc ? 1 : -1;
+                        if (valA > valB) return sortDesc ? -1 : 1;
+                        return 0;
                     });
                     
-                    currentPage = 1; [cite: 10]
-                    updateSortIcons(); [cite: 10]
-                    renderTable(filteredProducts);[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    currentPage = 1; 
+                    updateSortIcons(); 
+                    renderTable(filteredProducts);
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'prevPage', {
                 value: function() {
-                    if (currentPage > 1) {[cite: 10]
-                        currentPage--;[cite: 10]
-                        renderTable(filteredProducts);[cite: 10]
+                    if (currentPage > 1) {
+                        currentPage--;
+                        renderTable(filteredProducts);
                     }
-                }, writable: false, configurable: false[cite: 10]
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'nextPage', {
                 value: function() {
-                    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);[cite: 10]
-                    if (currentPage < totalPages) {[cite: 10]
-                        currentPage++;[cite: 10]
-                        renderTable(filteredProducts);[cite: 10]
+                    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+                    if (currentPage < totalPages) {
+                        currentPage++;
+                        renderTable(filteredProducts);
                     }
-                }, writable: false, configurable: false[cite: 10]
+                }, writable: false, configurable: false
             });
 
             function updateSortIcons() {
-                const cols = ['title', 'price', 'promo_price', 'quantity'];[cite: 10]
+                const cols = ['title', 'price', 'promo_price', 'quantity'];
                 cols.forEach(col => {
-                    const icon = document.getElementById(`sortIcon-${col}`);[cite: 10]
+                    const icon = document.getElementById(`sortIcon-${col}`);
                     if (icon) {
-                        icon.className = 'fas ml-1';[cite: 10]
-                        if (col === sortCol) {[cite: 10]
-                            icon.classList.add(sortDesc ? 'fa-sort-down' : 'fa-sort-up');[cite: 10]
-                            icon.classList.add('text-blue-500'); icon.classList.remove('text-slate-300');[cite: 10]
+                        icon.className = 'fas ml-1';
+                        if (col === sortCol) {
+                            icon.classList.add(sortDesc ? 'fa-sort-down' : 'fa-sort-up');
+                            icon.classList.add('text-blue-500'); icon.classList.remove('text-slate-300');
                         } else {
-                            icon.classList.add('fa-sort');[cite: 10]
-                            icon.classList.add('text-slate-300'); icon.classList.remove('text-blue-500');[cite: 10]
+                            icon.classList.add('fa-sort');
+                            icon.classList.add('text-slate-300'); icon.classList.remove('text-blue-500');
                         }
                     }
                 });
             }
 
             function renderTable(products) {
-                const tbody = document.getElementById('catalogTableBody');[cite: 10]
-                tbody.innerHTML = '';[cite: 10]
-                document.getElementById('totalProductCounter').innerText = `Total: ${products.length} Produk`;[cite: 10]
+                const tbody = document.getElementById('catalogTableBody');
+                tbody.innerHTML = '';
+                document.getElementById('totalProductCounter').innerText = `Total: ${products.length} Produk`;
 
-                const totalPages = Math.ceil(products.length / itemsPerPage) || 1;[cite: 10]
-                document.getElementById('pageIndicator').innerText = `Halaman ${currentPage} / ${totalPages}`;[cite: 10]
-                document.getElementById('btnPrevPage').disabled = currentPage === 1;[cite: 10]
-                document.getElementById('btnNextPage').disabled = currentPage === totalPages;[cite: 10]
+                const totalPages = Math.ceil(products.length / itemsPerPage) || 1;
+                document.getElementById('pageIndicator').innerText = `Halaman ${currentPage} / ${totalPages}`;
+                document.getElementById('btnPrevPage').disabled = currentPage === 1;
+                document.getElementById('btnNextPage').disabled = currentPage === totalPages;
 
                 if (products.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="7" class="p-12 text-center text-slate-400">Tidak ada produk ditemukan.</td></tr>`;[cite: 10]
+                    tbody.innerHTML = `<tr><td colspan="7" class="p-12 text-center text-slate-400">Tidak ada produk ditemukan.</td></tr>`;
                     return;
                 }
 
-                const startIndex = (currentPage - 1) * itemsPerPage;[cite: 10]
-                const endIndex = startIndex + itemsPerPage;[cite: 10]
-                const paginatedProducts = products.slice(startIndex, endIndex);[cite: 10]
+                const startIndex = (currentPage - 1) * itemsPerPage;
+                const endIndex = startIndex + itemsPerPage;
+                const paginatedProducts = products.slice(startIndex, endIndex);
 
-                const fragment = document.createDocumentFragment();[cite: 10]
+                const fragment = document.createDocumentFragment();
 
-                paginatedProducts.forEach(p => {[cite: 10]
-                    const safeId = escapeHTML(String(p.id));[cite: 10]
-                    const safeTitle = escapeHTML(p.title || p.name || 'Produk Tanpa Nama');[cite: 10]
-                    const imgUrl = safeURL(p.image_url || p.image || p.img || '');[cite: 10]
-                    const price = Number(p.price) || 0;[cite: 10]
-                    const isPromo = p.is_promo == 1 || p.is_promo === true;[cite: 10]
-                    const promoPrice = Number(p.promo_price) || 0;[cite: 10]
-                    const qty = Number(p.quantity) || 0;[cite: 10]
+                paginatedProducts.forEach(p => {
+                    const safeId = escapeHTML(String(p.id));
+                    const safeTitle = escapeHTML(p.title || p.name || 'Produk Tanpa Nama');
+                    const imgUrl = safeURL(p.image_url || p.image || p.img || '');
+                    const price = Number(p.price) || 0;
+                    const isPromo = p.is_promo == 1 || p.is_promo === true;
+                    const promoPrice = Number(p.promo_price) || 0;
+                    const qty = Number(p.quantity) || 0;
                     
-                    const isChecked = selectedIds.has(safeId) ? 'checked' : '';[cite: 10]
+                    const isChecked = selectedIds.has(safeId) ? 'checked' : '';
 
                     const statusBadge = qty > 0 
-                        ? `<span class="bg-green-100 text-green-700 px-2 py-1 rounded-md text-[10px] font-bold"><i class="fas fa-check-circle mr-1"></i> Tersedia</span>`[cite: 10]
-                        : `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded-md text-[10px] font-bold"><i class="fas fa-times-circle mr-1"></i> Habis</span>`;[cite: 10]
+                        ? `<span class="bg-green-100 text-green-700 px-2 py-1 rounded-md text-[10px] font-bold"><i class="fas fa-check-circle mr-1"></i> Tersedia</span>`
+                        : `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded-md text-[10px] font-bold"><i class="fas fa-times-circle mr-1"></i> Habis</span>`;
 
-                    const tr = document.createElement('tr');[cite: 10]
-                    tr.className = 'border-b border-gray-100 table-row-hover transition-colors';[cite: 10]
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-gray-100 table-row-hover transition-colors';
                     tr.innerHTML = `
                         <td class="p-4 text-center">
                             <input type="checkbox" class="row-cb cursor-pointer w-4 h-4 rounded text-blue-600 border-gray-300" value="${safeId}" onclick="toggleRow('${safeId}', this.checked)" ${isChecked}>
@@ -1038,85 +1034,84 @@
                                 </button>
                             </div>
                         </td>
-                    `;[cite: 10]
-                    fragment.appendChild(tr);[cite: 10]
+                    `;
+                    fragment.appendChild(tr);
                 });
-                tbody.appendChild(fragment);[cite: 10]
+                tbody.appendChild(fragment);
             }
 
             Object.defineProperty(window, 'addFilterRow', {
                 value: function(key = '', val = '') {
-                    const container = document.getElementById('editFiltersContainer');[cite: 10]
-                    const div = document.createElement('div');[cite: 10]
-                    div.className = 'flex gap-2 items-center filter-row w-full mb-1';[cite: 10]
+                    const container = document.getElementById('editFiltersContainer');
+                    const div = document.createElement('div');
+                    div.className = 'flex gap-2 items-center filter-row w-full mb-1';
                     div.innerHTML = `
                         <input type="text" class="neu-input flex-1 filter-key text-xs p-2.5 bg-white border-blue-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-200" placeholder="Atribut (Cth: Fungsi)" value="${escapeHTML(key)}">
                         <input type="text" class="neu-input flex-[1.5] filter-value text-xs p-2.5 bg-white border-blue-100 focus:border-blue-500 focus:ring-1 focus:ring-blue-200" placeholder="Nilai (Cth: Anti Bau)" value="${escapeHTML(val)}">
                         <button type="button" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-500 hover:bg-rose-500 hover:text-white transition flex-shrink-0 flex items-center justify-center border border-rose-100 shadow-sm" onclick="this.parentElement.remove()" title="Hapus Atribut"><i class="fas fa-trash-alt text-[10px]"></i></button>
-                    `;[cite: 10]
-                    container.appendChild(div);[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    `;
+                    container.appendChild(div);
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'renderEditImages', {
                 value: function() {
-                    const gallery = document.getElementById('editImageGallery');[cite: 10]
-                    const counter = document.getElementById('imgCounter');[cite: 10]
-                    gallery.innerHTML = '';[cite: 10]
-                    counter.innerText = `(${currentEditImages.length}/9)`;[cite: 10]
+                    const gallery = document.getElementById('editImageGallery');
+                    const counter = document.getElementById('imgCounter');
+                    gallery.innerHTML = '';
+                    counter.innerText = `(${currentEditImages.length}/9)`;
                     
-                    currentEditImages.forEach((url, index) => {[cite: 10]
-                        const div = document.createElement('div');[cite: 10]
-                        div.className = "relative w-16 h-16 rounded-xl border border-gray-200 overflow-hidden shadow-sm flex-shrink-0 img-thumb-container transition bg-slate-100";[cite: 10]
+                    currentEditImages.forEach((url, index) => {
+                        const div = document.createElement('div');
+                        div.className = "relative w-16 h-16 rounded-xl border border-gray-200 overflow-hidden shadow-sm flex-shrink-0 img-thumb-container transition bg-slate-100";
                         div.innerHTML = `
                             <img src="${safeURL(url)}" class="w-full h-full object-cover">
                             <button onclick="window.removeEditImage(${index})" type="button" class="img-remove-btn absolute top-0 right-0 bg-red-500 text-white rounded-bl-xl w-6 h-6 flex items-center justify-center text-[10px] opacity-0 invisible transform scale-90 transition-all hover:bg-red-600 shadow-md" title="Hapus Foto"><i class="fas fa-times"></i></button>
-                        `;[cite: 10]
-                        gallery.appendChild(div);[cite: 10]
+                        `;
+                        gallery.appendChild(div);
                     });
 
-                    if (currentEditImages.length < 9) {[cite: 10]
-                        const addBtn = document.createElement('label');[cite: 10]
-                        addBtn.htmlFor = 'editProdFileInput';[cite: 10]
-                        addBtn.className = "w-16 h-16 rounded-xl border-2 border-dashed border-blue-300 text-blue-500 flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 transition flex-shrink-0";[cite: 10]
-                        addBtn.innerHTML = '<i class="fas fa-plus mb-1"></i><span class="text-[9px] font-bold">Tambah</span>';[cite: 10]
-                        gallery.appendChild(addBtn);[cite: 10]
+                    if (currentEditImages.length < 9) {
+                        const addBtn = document.createElement('label');
+                        addBtn.htmlFor = 'editProdFileInput';
+                        addBtn.className = "w-16 h-16 rounded-xl border-2 border-dashed border-blue-300 text-blue-500 flex flex-col items-center justify-center cursor-pointer hover:bg-blue-50 transition flex-shrink-0";
+                        addBtn.innerHTML = '<i class="fas fa-plus mb-1"></i><span class="text-[9px] font-bold">Tambah</span>';
+                        gallery.appendChild(addBtn);
                     }
-                }, writable: false, configurable: false[cite: 10]
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'removeEditImage', {
                 value: function(index) {
-                    currentEditImages.splice(index, 1);[cite: 10]
-                    window.renderEditImages();[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    currentEditImages.splice(index, 1);
+                    window.renderEditImages();
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'handleImageUpload', {
                 value: async function(event) {
-                    const files = Array.from(event.target.files);[cite: 10]
-                    if (files.length === 0) return;[cite: 10]
+                    const files = Array.from(event.target.files);
+                    if (files.length === 0) return;
 
-                    if (currentEditImages.length + files.length > 9) {[cite: 10]
-                        showNotification("Batas Maksimal", `Anda hanya bisa mengunggah ${9 - currentEditImages.length} foto lagi.`, "warning");[cite: 10]
+                    if (currentEditImages.length + files.length > 9) {
+                        showNotification("Batas Maksimal", `Anda hanya bisa mengunggah ${9 - currentEditImages.length} foto lagi.`, "warning");
                         return;
                     }
 
-                    const statusTxt = document.getElementById('uploadStatus');[cite: 10]
-                    const btnSave = document.getElementById('btnSaveEdit');[cite: 10]
+                    const statusTxt = document.getElementById('uploadStatus');
+                    const btnSave = document.getElementById('btnSaveEdit');
                     
-                    for (let file of files) {[cite: 10]
-                        if (file.size > 5 * 1024 * 1024) {[cite: 10]
-                            showNotification("Terlalu Besar", "Ada foto yang ukurannya melebihi 5MB.", "error");[cite: 10]
+                    for (let file of files) {
+                        if (file.size > 5 * 1024 * 1024) {
+                            showNotification("Terlalu Besar", "Ada foto yang ukurannya melebihi 5MB.", "error");
                             return;
                         }
                     }
 
-                    statusTxt.innerHTML = '<i class="fas fa-user-secret text-slate-500"></i> Meminta otorisasi aman...';[cite: 10]
-                    btnSave.disabled = true; [cite: 10]
+                    statusTxt.innerHTML = '<i class="fas fa-user-secret text-slate-500"></i> Meminta otorisasi aman...';
+                    btnSave.disabled = true; 
                     
                     try {
-                        // 🔒 SECURITY OBFUSCATION: Menyusun API Key ImgBB rahasia Anda agar kebal dari scraper bot GitHub
                         const _0xKeyChunks = [
                             '8b6016ef', 
                             '63a42ef8', 
@@ -1125,166 +1120,166 @@
                         ];
                         const secureApiKey = _0xKeyChunks.join('');
 
-                        statusTxt.innerHTML = `<i class="fas fa-spinner fa-spin text-blue-500"></i> Mengunggah ${files.length} foto serentak...`;[cite: 10]
+                        statusTxt.innerHTML = `<i class="fas fa-spinner fa-spin text-blue-500"></i> Mengunggah ${files.length} foto serentak...`;
                         
-                        const uploadPromises = files.map(async (file) => {[cite: 10]
-                            const formData = new FormData();[cite: 10]
-                            formData.append('image', file);[cite: 10]
+                        const uploadPromises = files.map(async (file) => {
+                            const formData = new FormData();
+                            formData.append('image', file);
 
-                            const res = await fetch(`https://api.imgbb.com/1/upload?key=${secureApiKey}`, {[cite: 10]
-                                method: 'POST', body: formData[cite: 10]
+                            const res = await fetch(`https://api.imgbb.com/1/upload?key=${secureApiKey}`, {
+                                method: 'POST', body: formData
                             });
                             
-                            const data = await res.json();[cite: 10]
-                            if (data.success) {[cite: 10]
-                                let finalUrl = data.data.url;[cite: 10]
-                                return finalUrl.replace("i.ibb.co/", "i.ibb.co.com/");[cite: 10]
+                            const data = await res.json();
+                            if (data.success) {
+                                let finalUrl = data.data.url;
+                                return finalUrl.replace("i.ibb.co/", "i.ibb.co.com/");
                             } else {
-                                throw new Error(data.error.message || "Gagal dari ImgBB.");[cite: 10]
+                                throw new Error(data.error.message || "Gagal dari ImgBB.");
                             }
                         });
 
-                        const newUrls = await Promise.all(uploadPromises);[cite: 10]
-                        currentEditImages.push(...newUrls);[cite: 10]
+                        const newUrls = await Promise.all(uploadPromises);
+                        currentEditImages.push(...newUrls);
                         
-                        window.renderEditImages();[cite: 10]
-                        statusTxt.innerHTML = `<i class="fas fa-check text-green-500"></i> ${files.length} Foto berhasil diunggah!`;[cite: 10]
+                        window.renderEditImages();
+                        statusTxt.innerHTML = `<i class="fas fa-check text-green-500"></i> ${files.length} Foto berhasil diunggah!`;
                     } catch (error) {
-                        statusTxt.innerHTML = `<i class="fas fa-times text-red-500"></i> Gagal: ${error.message}`;[cite: 10]
-                        showNotification("Upload Gagal", error.message, "error");[cite: 10]
+                        statusTxt.innerHTML = `<i class="fas fa-times text-red-500"></i> Gagal: ${error.message}`;
+                        showNotification("Upload Gagal", error.message, "error");
                     } finally {
-                        btnSave.disabled = false;[cite: 10]
-                        event.target.value = ''; [cite: 10]
+                        btnSave.disabled = false;
+                        event.target.value = ''; 
                     }
-                }, writable: false, configurable: false[cite: 10]
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'triggerEdit', {
                 value: function(id) {
-                    const safeId = String(id);[cite: 10]
-                    const prod = allProducts.find(p => String(p.id) === safeId);[cite: 10]
-                    if (!prod) return;[cite: 10]
+                    const safeId = String(id);
+                    const prod = allProducts.find(p => String(p.id) === safeId);
+                    if (!prod) return;
 
-                    document.getElementById('editProdId').value = safeId;[cite: 10]
-                    document.getElementById('editProdName').value = escapeHTML(prod.title || prod.name || '');[cite: 10]
-                    document.getElementById('editProdCategory').value = escapeHTML(prod.category || '');[cite: 10]
+                    document.getElementById('editProdId').value = safeId;
+                    document.getElementById('editProdName').value = escapeHTML(prod.title || prod.name || '');
+                    document.getElementById('editProdCategory').value = escapeHTML(prod.category || '');
                     
-                    document.getElementById('editProdPrice').value = Number(prod.price) || 0;[cite: 10]
-                    document.getElementById('editProdStock').value = Number(prod.quantity) || 0;[cite: 10]
-                    document.getElementById('editProdWeight').value = Number(prod.weight) || 0;[cite: 10]
+                    document.getElementById('editProdPrice').value = Number(prod.price) || 0;
+                    document.getElementById('editProdStock').value = Number(prod.quantity) || 0;
+                    document.getElementById('editProdWeight').value = Number(prod.weight) || 0;
                     
-                    const isPromo = prod.is_promo == 1 || prod.is_promo === true;[cite: 10]
-                    document.getElementById('editProdIsPromo').checked = isPromo;[cite: 10]
-                    document.getElementById('editProdPromoPrice').value = Number(prod.promo_price) || 0;[cite: 10]
+                    const isPromo = prod.is_promo == 1 || prod.is_promo === true;
+                    document.getElementById('editProdIsPromo').checked = isPromo;
+                    document.getElementById('editProdPromoPrice').value = Number(prod.promo_price) || 0;
                     
-                    document.getElementById('editProdDesc').value = prod.desc || '';[cite: 10]
-                    document.getElementById('editProdInfo').value = prod.info || '';[cite: 10]
+                    document.getElementById('editProdDesc').value = prod.desc || '';
+                    document.getElementById('editProdInfo').value = prod.info || '';
                     
-                    const filterContainer = document.getElementById('editFiltersContainer');[cite: 10]
-                    filterContainer.innerHTML = '';[cite: 10]
+                    const filterContainer = document.getElementById('editFiltersContainer');
+                    filterContainer.innerHTML = '';
                     
-                    let parsedFilters = {};[cite: 10]
+                    let parsedFilters = {};
                     try {
-                        if (typeof prod.filters === 'object' && prod.filters !== null) parsedFilters = prod.filters;[cite: 10]
-                        else if (typeof prod.filters === 'string' && prod.filters.trim() !== '') parsedFilters = JSON.parse(prod.filters);[cite: 10]
+                        if (typeof prod.filters === 'object' && prod.filters !== null) parsedFilters = prod.filters;
+                        else if (typeof prod.filters === 'string' && prod.filters.trim() !== '') parsedFilters = JSON.parse(prod.filters);
                     } catch(e) {}
 
-                    const keys = Object.keys(parsedFilters);[cite: 10]
-                    if (keys.length > 0) {[cite: 10]
-                        keys.forEach(k => {[cite: 10]
-                            let valStr = parsedFilters[k];[cite: 10]
-                            if (Array.isArray(valStr)) valStr = valStr.join(', ');[cite: 10]
-                            window.addFilterRow(k, valStr);[cite: 10]
+                    const keys = Object.keys(parsedFilters);
+                    if (keys.length > 0) {
+                        keys.forEach(k => {
+                            let valStr = parsedFilters[k];
+                            if (Array.isArray(valStr)) valStr = valStr.join(', ');
+                            window.addFilterRow(k, valStr);
                         });
                     } else {
-                        window.addFilterRow('', '');[cite: 10]
+                        window.addFilterRow('', '');
                     }
                     
-                    currentEditImages = [];[cite: 10]
-                    let imgRaw = prod.image_url || prod.image || prod.img || '';[cite: 10]
-                    if (typeof imgRaw === 'string') {[cite: 10]
+                    currentEditImages = [];
+                    let imgRaw = prod.image_url || prod.image || prod.img || '';
+                    if (typeof imgRaw === 'string') {
                         try {
-                            if (imgRaw.startsWith('[') || imgRaw.startsWith('{')) {[cite: 10]
-                                const parsed = JSON.parse(imgRaw);[cite: 10]
-                                if (Array.isArray(parsed)) currentEditImages = parsed.map(url => String(url));[cite: 10]
-                            } else if (imgRaw.trim() !== '') { currentEditImages = [imgRaw.trim()]; }[cite: 10]
-                        } catch(e) { if (imgRaw.trim() !== '') currentEditImages = [imgRaw.trim()]; }[cite: 10]
-                    } else if (Array.isArray(imgRaw)) { currentEditImages = imgRaw.map(url => String(url)); }[cite: 10]
+                            if (imgRaw.startsWith('[') || imgRaw.startsWith('{')) {
+                                const parsed = JSON.parse(imgRaw);
+                                if (Array.isArray(parsed)) currentEditImages = parsed.map(url => String(url));
+                            } else if (imgRaw.trim() !== '') { currentEditImages = [imgRaw.trim()]; }
+                        } catch(e) { if (imgRaw.trim() !== '') currentEditImages = [imgRaw.trim()]; }
+                    } else if (Array.isArray(imgRaw)) { currentEditImages = imgRaw.map(url => String(url)); }
 
-                    document.getElementById('uploadStatus').innerHTML = 'Anda bisa mengeblok/memilih banyak foto sekaligus (maks. 9). URL otomatis terisi.';[cite: 10]
-                    window.renderEditImages();[cite: 10]
+                    document.getElementById('uploadStatus').innerHTML = 'Anda bisa mengeblok/memilih banyak foto sekaligus (maks. 9). URL otomatis terisi.';
+                    window.renderEditImages();
                     
-                    window.togglePromoInput();[cite: 10]
+                    window.togglePromoInput();
                     
-                    document.getElementById('editModal').classList.add('active');[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    document.getElementById('editModal').classList.add('active');
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'closeEditModal', {
-                value: function() { document.getElementById('editModal').classList.remove('active'); }, writable: false, configurable: false[cite: 10]
+                value: function() { document.getElementById('editModal').classList.remove('active'); }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'saveProductEdit', {
                 value: async function() {
-                    if (currentEditImages.length < 1) {[cite: 10]
-                        showNotification("Foto Kosong", "Produk minimal harus memiliki 1 foto.", "warning");[cite: 10]
+                    if (currentEditImages.length < 1) {
+                        showNotification("Foto Kosong", "Produk minimal harus memiliki 1 foto.", "warning");
                         return;
                     }
                     
-                    let finalFiltersObj = {};[cite: 10]
-                    document.querySelectorAll('.filter-row').forEach(row => {[cite: 10]
-                        const k = row.querySelector('.filter-key').value.trim();[cite: 10]
-                        const v = row.querySelector('.filter-value').value.trim();[cite: 10]
-                        if (k && v) {[cite: 10]
-                            finalFiltersObj[k] = v.split(',').map(s => s.trim()).filter(s => s !== '');[cite: 10]
+                    let finalFiltersObj = {};
+                    document.querySelectorAll('.filter-row').forEach(row => {
+                        const k = row.querySelector('.filter-key').value.trim();
+                        const v = row.querySelector('.filter-value').value.trim();
+                        if (k && v) {
+                            finalFiltersObj[k] = v.split(',').map(s => s.trim()).filter(s => s !== '');
                         }
                     });
 
-                    const id = document.getElementById('editProdId').value;[cite: 10]
-                    const isPromoChecked = document.getElementById('editProdIsPromo').checked;[cite: 10]
+                    const id = document.getElementById('editProdId').value;
+                    const isPromoChecked = document.getElementById('editProdIsPromo').checked;
                     
                     const payload = {
-                        title: document.getElementById('editProdName').value,[cite: 10]
-                        price: Number(document.getElementById('editProdPrice').value),[cite: 10]
-                        quantity: Number(document.getElementById('editProdStock').value),[cite: 10]
-                        is_promo: isPromoChecked ? 1 : 0,[cite: 10]
-                        promo_price: isPromoChecked ? Number(document.getElementById('editProdPromoPrice').value) : 0,[cite: 10]
-                        image_url: JSON.stringify(currentEditImages),[cite: 10]
-                        desc: document.getElementById('editProdDesc').value,[cite: 10]
-                        category: document.getElementById('editProdCategory').value,[cite: 10]
-                        info: document.getElementById('editProdInfo').value,[cite: 10]
-                        filters: JSON.stringify(finalFiltersObj),[cite: 10]
-                        weight: Number(document.getElementById('editProdWeight').value)[cite: 10]
+                        title: document.getElementById('editProdName').value,
+                        price: Number(document.getElementById('editProdPrice').value),
+                        quantity: Number(document.getElementById('editProdStock').value),
+                        is_promo: isPromoChecked ? 1 : 0,
+                        promo_price: isPromoChecked ? Number(document.getElementById('editProdPromoPrice').value) : 0,
+                        image_url: JSON.stringify(currentEditImages),
+                        desc: document.getElementById('editProdDesc').value,
+                        category: document.getElementById('editProdCategory').value,
+                        info: document.getElementById('editProdInfo').value,
+                        filters: JSON.stringify(finalFiltersObj),
+                        weight: Number(document.getElementById('editProdWeight').value)
                     };
 
-                    const btn = document.getElementById('btnSaveEdit');[cite: 10]
-                    const originalText = btn.innerHTML;[cite: 10]
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';[cite: 10]
-                    btn.disabled = true;[cite: 10]
+                    const btn = document.getElementById('btnSaveEdit');
+                    const originalText = btn.innerHTML;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyimpan...';
+                    btn.disabled = true;
 
                     try {
-                        const response = await fetch(`${BASE_URL}/api/admin/catalog/${id}`, {[cite: 10]
-                            method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },[cite: 10]
-                            body: JSON.stringify(payload)[cite: 10]
+                        const response = await fetch(`${BASE_URL}/api/admin/catalog/${id}`, {
+                            method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                            body: JSON.stringify(payload)
                         });
                         
-                        if (!response.ok) {[cite: 10]
-                            const errText = await response.text();[cite: 10]
-                            let errMsg = "Gagal menyimpan perubahan ke database.";[cite: 10]
-                            try { errMsg = JSON.parse(errText).error || errMsg; } catch(e) { errMsg = errText || errMsg; }[cite: 10]
-                            throw new Error(errMsg);[cite: 10]
+                        if (!response.ok) {
+                            const errText = await response.text();
+                            let errMsg = "Gagal menyimpan perubahan ke database.";
+                            try { errMsg = JSON.parse(errText).error || errMsg; } catch(e) { errMsg = errText || errMsg; }
+                            throw new Error(errMsg);
                         }
 
-                        window.closeEditModal();[cite: 10]
-                        showNotification("Berhasil", "Data produk berhasil diperbarui!", "success");[cite: 10]
-                        loadCatalog(); [cite: 10]
+                        window.closeEditModal();
+                        showNotification("Berhasil", "Data produk berhasil diperbarui!", "success");
+                        loadCatalog(); 
 
                     } catch (error) {
-                        showNotification("Peringatan Sistem", error.message, "error");[cite: 10]
+                        showNotification("Peringatan Sistem", error.message, "error");
                     } finally {
-                        btn.innerHTML = originalText; btn.disabled = false;[cite: 10]
+                        btn.innerHTML = originalText; btn.disabled = false;
                     }
-                }, writable: false, configurable: false[cite: 10]
+                }, writable: false, configurable: false
             });
 
             // =========================================================================
@@ -1322,47 +1317,47 @@
 
             Object.defineProperty(window, 'triggerDelete', {
                 value: function(id) {
-                    const safeId = String(id);[cite: 10]
-                    const prod = allProducts.find(p => String(p.id) === safeId);[cite: 10]
-                    if (!prod) return;[cite: 10]
+                    const safeId = String(id);
+                    const prod = allProducts.find(p => String(p.id) === safeId);
+                    if (!prod) return;
 
-                    document.getElementById('deleteProdId').value = safeId;[cite: 10]
-                    document.getElementById('deleteProdName').innerText = escapeHTML(prod.title || prod.name || 'Produk');[cite: 10]
-                    document.getElementById('deleteModal').classList.add('active');[cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    document.getElementById('deleteProdId').value = safeId;
+                    document.getElementById('deleteProdName').innerText = escapeHTML(prod.title || prod.name || 'Produk');
+                    document.getElementById('deleteModal').classList.add('active');
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'closeDeleteModal', {
-                value: function() { document.getElementById('deleteModal').classList.remove('active'); }, writable: false, configurable: false[cite: 10]
+                value: function() { document.getElementById('deleteModal').classList.remove('active'); }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'executeDelete', {
                 value: async function() {
-                    const id = document.getElementById('deleteProdId').value;[cite: 10]
-                    window.closeDeleteModal();[cite: 10]
+                    const id = document.getElementById('deleteProdId').value;
+                    window.closeDeleteModal();
 
                     try {
-                        const response = await fetch(`${BASE_URL}/api/admin/catalog/${id}`, {[cite: 10]
-                            method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }[cite: 10]
+                        const response = await fetch(`${BASE_URL}/api/admin/catalog/${id}`, {
+                            method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
                         });
-                        if (!response.ok) throw new Error("Gagal menghapus produk dari database.");[cite: 10]
-                        showNotification("Berhasil", "Produk telah dihapus dari katalog.", "success");[cite: 10]
-                        loadCatalog(); [cite: 10]
+                        if (!response.ok) throw new Error("Gagal menghapus produk dari database.");
+                        showNotification("Berhasil", "Produk telah dihapus dari katalog.", "success");
+                        loadCatalog(); 
                     } catch (error) {
-                        showNotification("Peringatan Sistem", error.message, "error");[cite: 10]
+                        showNotification("Peringatan Sistem", error.message, "error");
                     }
-                }, writable: false, configurable: false[cite: 10]
+                }, writable: false, configurable: false
             });
 
             Object.defineProperty(window, 'logoutAdmin', {
                 value: function() {
-                    localStorage.removeItem('admin_session');[cite: 10]
-                    localStorage.removeItem('user_session'); [cite: 10]
-                    window.location.replace("login.html"); [cite: 10]
-                }, writable: false, configurable: false[cite: 10]
+                    localStorage.removeItem('admin_session');
+                    localStorage.removeItem('user_session'); 
+                    window.location.replace("login.html"); 
+                }, writable: false, configurable: false
             });
 
-            window.addEventListener('DOMContentLoaded', loadCatalog);[cite: 10]
+            window.addEventListener('DOMContentLoaded', loadCatalog);
 
         })(); 
     </script>
