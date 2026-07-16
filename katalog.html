@@ -125,9 +125,23 @@
                         <i class="fa-solid fa-satellite-dish"></i> Update Web
                     </button>
 
+                    <!-- FITUR BARU: Dropdown Urutkan Abjad -->
+                    <div class="relative flex-1 min-w-[160px] max-w-full xl:max-w-[200px]">
+                        <select id="sortDropdown" onchange="window.handleDropdownSort(this.value)" class="w-full pl-4 pr-10 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white cursor-pointer text-slate-600 appearance-none font-bold shadow-sm">
+                            <option value="id_desc">Urut: Terbaru</option>
+                            <option value="title_asc">Abjad (A - Z)</option>
+                            <option value="title_desc">Abjad (Z - A)</option>
+                            <option value="price_asc">Harga Termurah</option>
+                            <option value="price_desc">Harga Termahal</option>
+                            <option value="quantity_asc">Stok Paling Sedikit</option>
+                            <option value="quantity_desc">Stok Terbanyak</option>
+                        </select>
+                        <i class="fa-solid fa-sort absolute right-4 top-1/2 transform -translate-y-1/2 text-slate-400 pointer-events-none"></i>
+                    </div>
+
                     <div class="relative flex-1 min-w-[200px] max-w-full xl:max-w-[250px]">
                         <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
-                        <input type="text" id="searchInput" oninput="window.toggleClearButton(); window.applyFilterAndSort()" placeholder="Cari nama atau ID..." class="w-full pl-10 pr-10 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
+                        <input type="text" id="searchInput" oninput="window.toggleClearButton(); window.applyFilterAndSort(false)" placeholder="Cari nama atau ID..." class="w-full pl-10 pr-10 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all">
                         <button id="clearSearchBtn" onclick="window.clearSearch()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400 hover:text-rose-500 focus:outline-none transition-colors hidden" title="Hapus Pencarian">
                             <i class="fa-solid fa-times"></i>
                         </button>
@@ -165,9 +179,16 @@
                 <div class="p-4 border-t border-gray-100 bg-slate-50 flex justify-between items-center text-xs text-slate-500 flex-wrap gap-3">
                     <span id="totalProductCounter" class="font-bold">Total: 0 Produk</span>
                     
-                    <div class="flex items-center gap-3 bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm">
+                    <!-- FITUR BARU: Input Lompat Halaman -->
+                    <div class="flex items-center gap-2 bg-white px-2 py-1.5 rounded-lg border border-gray-200 shadow-sm">
                         <button onclick="window.prevPage()" id="btnPrevPage" class="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition text-slate-600"><i class="fas fa-chevron-left"></i></button>
-                        <span id="pageIndicator" class="font-bold text-slate-700 min-w-[100px] text-center">Halaman 1 / 1</span>
+                        
+                        <div class="flex items-center gap-1 text-xs font-bold text-slate-700">
+                            Hal 
+                            <input type="number" id="pageInput" value="1" min="1" class="w-12 text-center border border-gray-200 rounded py-1 bg-slate-50 focus:outline-none focus:border-blue-500 focus:bg-white transition-all" onchange="window.jumpToPage(this.value)" title="Ketik angka lalu tekan Enter">
+                            dari <span id="totalPagesIndicator">1</span>
+                        </div>
+
                         <button onclick="window.nextPage()" id="btnNextPage" class="w-8 h-8 flex items-center justify-center bg-white border border-gray-200 rounded hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition text-slate-600"><i class="fas fa-chevron-right"></i></button>
                     </div>
 
@@ -436,7 +457,7 @@
                     const input = document.getElementById('searchInput');
                     input.value = '';
                     window.toggleClearButton();
-                    window.applyFilterAndSort();
+                    window.applyFilterAndSort(false); // Reset page 1 jika dihapus
                     input.focus(); 
                 }, writable: false, configurable: false
             });
@@ -472,7 +493,8 @@
                 }, writable: false, configurable: false
             });
 
-            async function loadCatalog() {
+            // 🔥 FITUR BARU: Parameter `keepPage` agar halaman tidak tereset ke 1 saat ditarik ulang dari server
+            async function loadCatalog(keepPage = false) {
                 try {
                     const response = await fetch(`${BASE_URL}/api/admin/catalog`, {
                         headers: { 'Authorization': `Bearer ${token}`, 'Cache-Control': 'no-store' }
@@ -480,7 +502,7 @@
                     if (!response.ok) throw new Error("Gagal mengambil data katalog Admin.");
                     
                     allProducts = await response.json();
-                    window.applyFilterAndSort(); 
+                    window.applyFilterAndSort(keepPage); 
                 } catch (error) {
                     document.getElementById('catalogTableBody').innerHTML = `
                         <tr><td colspan="7" class="p-12 text-center text-rose-500">
@@ -570,7 +592,8 @@
                     selectedIds.clear(); 
                     updateBulkButton();
                     document.getElementById('selectAllCb').checked = false;
-                    loadCatalog(); 
+                    // 🔥 TETAP DI HALAMAN SAAT INI SETELAH MENGHAPUS MASSAL
+                    loadCatalog(true); 
                 }, writable: false, configurable: false
             });
 
@@ -690,7 +713,8 @@
                     
                     selectedIds.clear(); updateBulkButton();
                     document.getElementById('selectAllCb').checked = false;
-                    loadCatalog(); 
+                    // 🔥 TETAP DI HALAMAN SAAT INI SETELAH EDIT MASSAL
+                    loadCatalog(true); 
                 }, writable: false, configurable: false
             });
 
@@ -886,7 +910,7 @@
                             } else {
                                 showNotification("Upload Gagal", "Tidak ada data produk valid yang ditemukan di tab Excel tersebut.", "error");
                             }
-                            loadCatalog(); 
+                            loadCatalog(true); // Tetap di halaman agar rapi
 
                         } catch (error) {
                             document.getElementById('excelLoadingModal').classList.remove('active');
@@ -902,15 +926,35 @@
                 }, writable: false, configurable: false
             });
 
-            Object.defineProperty(window, 'handleSort', {
-                value: function(column) {
-                    if (sortCol === column) { sortDesc = !sortDesc; } else { sortCol = column; sortDesc = false; }
-                    window.applyFilterAndSort();
+            // 🔥 FITUR BARU: Dropdown Sort Map
+            Object.defineProperty(window, 'handleDropdownSort', {
+                value: function(val) {
+                    const parts = val.split('_');
+                    sortCol = parts[0];
+                    sortDesc = parts[1] === 'desc';
+                    window.applyFilterAndSort(false); // Reset ke Hal 1 jika ganti sort
                 }, writable: false, configurable: false
             });
 
+            Object.defineProperty(window, 'handleSort', {
+                value: function(column) {
+                    if (sortCol === column) { sortDesc = !sortDesc; } else { sortCol = column; sortDesc = false; }
+                    
+                    // Sync dengan Dropdown saat Header di-klik
+                    const dd = document.getElementById('sortDropdown');
+                    if (dd) {
+                        const val = sortCol + '_' + (sortDesc ? 'desc' : 'asc');
+                        const opt = dd.querySelector(`option[value="${val}"]`);
+                        if (opt) dd.value = val;
+                    }
+                    
+                    window.applyFilterAndSort(false);
+                }, writable: false, configurable: false
+            });
+
+            // 🔥 FITUR BARU: Parameter KeepPage ditambahkan di sini
             Object.defineProperty(window, 'applyFilterAndSort', {
-                value: function() {
+                value: function(keepPage = false) {
                     const query = document.getElementById('searchInput').value.toLowerCase();
                     filteredProducts = allProducts.filter(p => {
                         const title = (p.title || p.name || '').toLowerCase();
@@ -927,7 +971,9 @@
                         return 0;
                     });
                     
-                    currentPage = 1; 
+                    if (keepPage !== true) {
+                        currentPage = 1; 
+                    }
                     updateSortIcons(); 
                     renderTable(filteredProducts);
                 }, writable: false, configurable: false
@@ -949,6 +995,19 @@
                         currentPage++;
                         renderTable(filteredProducts);
                     }
+                }, writable: false, configurable: false
+            });
+
+            // 🔥 FITUR BARU: Fungsi Jump (Lompat) Halaman
+            Object.defineProperty(window, 'jumpToPage', {
+                value: function(val) {
+                    let page = parseInt(val);
+                    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage) || 1;
+                    if (isNaN(page) || page < 1) page = 1;
+                    if (page > totalPages) page = totalPages;
+                    
+                    currentPage = page;
+                    renderTable(filteredProducts);
                 }, writable: false, configurable: false
             });
 
@@ -975,7 +1034,14 @@
                 document.getElementById('totalProductCounter').innerText = `Total: ${products.length} Produk`;
 
                 const totalPages = Math.ceil(products.length / itemsPerPage) || 1;
-                document.getElementById('pageIndicator').innerText = `Halaman ${currentPage} / ${totalPages}`;
+                
+                // Update Kolom Input Halaman
+                const pageInput = document.getElementById('pageInput');
+                if (pageInput) {
+                    pageInput.value = currentPage;
+                    document.getElementById('totalPagesIndicator').innerText = totalPages;
+                }
+                
                 document.getElementById('btnPrevPage').disabled = currentPage === 1;
                 document.getElementById('btnNextPage').disabled = currentPage === totalPages;
 
@@ -1272,7 +1338,8 @@
 
                         window.closeEditModal();
                         showNotification("Berhasil", "Data produk berhasil diperbarui!", "success");
-                        loadCatalog(); 
+                        // 🔥 TETAP DI HALAMAN SAAT INI SETELAH SIMPAN
+                        loadCatalog(true); 
 
                     } catch (error) {
                         showNotification("Peringatan Sistem", error.message, "error");
@@ -1342,7 +1409,8 @@
                         });
                         if (!response.ok) throw new Error("Gagal menghapus produk dari database.");
                         showNotification("Berhasil", "Produk telah dihapus dari katalog.", "success");
-                        loadCatalog(); 
+                        // 🔥 TETAP DI HALAMAN SAAT INI SETELAH HAPUS
+                        loadCatalog(true); 
                     } catch (error) {
                         showNotification("Peringatan Sistem", error.message, "error");
                     }
