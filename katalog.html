@@ -355,6 +355,17 @@
             let currentPage = 1;
             const itemsPerPage = 50;
 
+            // 🔥 STATUS PEKERJAAN (Untuk Lock Tab Browser)
+            let isSystemBusy = false;
+
+            // 🔥 LISTENER SEBELUM TAB DITUTUP
+            window.addEventListener('beforeunload', function (e) {
+                if (isSystemBusy) {
+                    e.preventDefault();
+                    e.returnValue = 'Sistem sedang menjahit data massal. Dilarang menutup halaman ini!';
+                }
+            });
+
             function escapeHTML(str) {
                 if (!str) return '';
                 return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
@@ -761,6 +772,11 @@
                 }, writable: false, configurable: false
             });
 
+            // =========================================================================
+            // 🔥 FUNGSI IMPORT MASSAL DARI EXCEL (SISTEM GELOMBANG ANTI-TIMEOUT)
+            // Mampu memproses 10.000+ data tanpa memicu DDoS lokal / Server Timeout
+            // Dilengkapi dengan Sistem Gembok Layar & Tab Browser
+            // =========================================================================
             Object.defineProperty(window, 'importFromExcel', {
                 value: async function(event) {
                     const file = event.target.files[0];
@@ -769,85 +785,119 @@
                     const reader = new FileReader();
                     reader.onload = async function(e) {
                         try {
+                            // MENGAKTIFKAN GEMBOK LAYAR
+                            isSystemBusy = true;
+                            document.body.style.pointerEvents = 'none'; // Lumpuhkan klik layar (Anti Interruption)
+                            document.getElementById('excelLoadingModal').style.pointerEvents = 'auto'; // Biarkan modal aktif
                             document.getElementById('excelLoadingModal').classList.add('active');
+
                             const data = new Uint8Array(e.target.result);
                             const workbook = XLSX.read(data, {type: 'array'});
-                            const firstSheetName = workbook.SheetNames[0];
-                            const worksheet = workbook.Sheets[firstSheetName];
+                            
+                            let targetSheetName = workbook.SheetNames.find(name => name.includes("Upload"));
+                            if (!targetSheetName) targetSheetName = workbook.SheetNames[workbook.SheetNames.length - 1];
+                            
+                            const worksheet = workbook.Sheets[targetSheetName];
                             const jsonData = XLSX.utils.sheet_to_json(worksheet);
                             
                             let successCount = 0; let failCount = 0; let insertCount = 0;
+                            const totalData = jsonData.length;
+                            
+                            const chunkSize = 4; // Pengiriman Gelombang (Mencegah Timeout 15 Detik & OOM Backend)
 
-                            const uploadPromises = jsonData.map(async (row) => {
-                                if (row["Nama Produk"] && row["Nama Produk"].includes("[CONTOH TAMBAH BARU]")) return;
+                            for (let i = 0; i < totalData; i += chunkSize) {
+                                const chunk = jsonData.slice(i, i + chunkSize);
                                 
-                                const productId = row["[KUNCI] ID PRODUK (JANGAN DIUBAH)"] ? String(row["[KUNCI] ID PRODUK (JANGAN DIUBAH)"]).trim() : "";
-                                
-                                const isPromoStr = String(row["Status Promo (Aktif/Tidak)"] || "").toLowerCase().trim();
-                                const isPromo = (isPromoStr === "aktif" || isPromoStr === "ya" || isPromoStr === "1") ? 1 : 0;
-                                const promoPrice = isPromo === 1 ? (Number(row["Harga Diskon"]) || 0) : 0;
+                                document.getElementById('excelLoadingText').innerHTML = `
+                                    Memproses Gelombang: <b class="text-blue-600">${Math.min(i + chunkSize, totalData)}</b> dari <b class="text-slate-700">${totalData}</b> Produk...
+                                    <br><span class="text-[10px] text-rose-500 mt-2 block font-bold"><i class="fas fa-hand-paper"></i> Dilarang menutup atau me-refresh halaman ini!</span>
+                                `;
 
-                                let newImgArr = [];
-                                for (let i = 1; i <= 9; i++) {
-                                    let colName = i === 1 ? "Foto 1 (Utama)" : `Foto ${i}`;
-                                    if (row[colName] && String(row[colName]).trim() !== "") {
-                                        newImgArr.push(String(row[colName]).trim());
-                                    }
-                                }
-                                const payloadImg = JSON.stringify(newImgArr);
+                                const uploadPromises = chunk.map(async (row) => {
+                                    if (row["Nama Produk"] && row["Nama Produk"].includes("[CONTOH TAMBAH BARU]")) return;
+                                    if (!row["Nama Produk"] || String(row["Nama Produk"]).trim() === "") return;
+                                    
+                                    const productId = row["[KUNCI] ID PRODUK (JANGAN DIUBAH)"] ? String(row["[KUNCI] ID PRODUK (JANGAN DIUBAH)"]).trim() : "";
+                                    
+                                    const isPromoStr = String(row["Status Promo (Aktif/Tidak)"] || "").toLowerCase().trim();
+                                    const isPromo = (isPromoStr === "aktif" || isPromoStr === "ya" || isPromoStr === "1") ? 1 : 0;
+                                    const promoPrice = isPromo === 1 ? (Number(row["Harga Diskon"]) || 0) : 0;
 
-                                let rawFilter = row["Atribut Produk (Cth: Warna=Merah | Ukuran=XL)"] || "";
-                                let filterObj = {};
-                                if (rawFilter.trim() !== "") {
-                                    rawFilter.split('|').forEach(pair => {
-                                        let parts = pair.split('=');
-                                        if (parts.length >= 2) {
-                                            let k = parts[0].trim();
-                                            let v = parts.slice(1).join('=').trim(); 
-                                            filterObj[k] = v.split(',').map(s => s.trim()).filter(s => s !== '');
+                                    let newImgArr = [];
+                                    for (let j = 1; j <= 9; j++) {
+                                        let colName = j === 1 ? "Foto 1 (Utama)" : `Foto ${j}`;
+                                        if (row[colName] && String(row[colName]).trim() !== "") {
+                                            newImgArr.push(String(row[colName]).trim());
                                         }
-                                    });
-                                }
-                                const payloadFilter = JSON.stringify(filterObj);
+                                    }
+                                    const payloadImg = JSON.stringify(newImgArr);
 
-                                const payload = {
-                                    title: row["Nama Produk"] || "",
-                                    price: Number(row["Harga Asli"]) || 0,
-                                    quantity: Number(row["Stok Gudang"]) || 0,
-                                    is_promo: isPromo,
-                                    promo_price: promoPrice,
-                                    image_url: payloadImg,
-                                    desc: row["Deskripsi Produk"] || "",
-                                    category: row["Kategori"] || "",
-                                    info: row["Info Tambahan"] || "",
-                                    filters: payloadFilter,
-                                    weight: Number(row["Berat (Gram)"]) || 0
-                                };
+                                    let rawFilter = row["Atribut Produk (Cth: Warna=Merah | Ukuran=XL)"] || "";
+                                    let filterObj = {};
+                                    if (rawFilter.trim() !== "") {
+                                        rawFilter.split('|').forEach(pair => {
+                                            let parts = pair.split('=');
+                                            if (parts.length >= 2) {
+                                                let k = parts[0].trim();
+                                                let v = parts.slice(1).join('=').trim(); 
+                                                filterObj[k] = v.split(',').map(s => s.trim()).filter(s => s !== '');
+                                            }
+                                        });
+                                    }
+                                    const payloadFilter = JSON.stringify(filterObj);
 
-                                if (productId !== "") {
-                                    const res = await fetch(`${BASE_URL}/api/admin/catalog/${productId}`, {
-                                        method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                                        body: JSON.stringify(payload)
-                                    });
-                                    if (res.ok) successCount++; else failCount++;
-                                } 
-                                else if (payload.title !== "") {
-                                    const res = await fetch(`${BASE_URL}/api/admin/catalog`, {
-                                        method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                                        body: JSON.stringify(payload)
-                                    });
-                                    if (res.ok) insertCount++; else failCount++;
-                                }
-                            });
+                                    const payload = {
+                                        title: String(row["Nama Produk"]).trim(),
+                                        price: Number(row["Harga Asli"]) || 0,
+                                        quantity: Number(row["Stok Gudang"]) || 0,
+                                        is_promo: isPromo,
+                                        promo_price: promoPrice,
+                                        image_url: payloadImg,
+                                        desc: row["Deskripsi Produk"] || "",
+                                        category: row["Kategori"] || "",
+                                        info: row["Info Tambahan"] || "",
+                                        filters: payloadFilter,
+                                        weight: Number(row["Berat (Gram)"]) || 0
+                                    };
 
-                            await Promise.allSettled(uploadPromises);
+                                    if (productId !== "") {
+                                        const res = await fetch(`${BASE_URL}/api/admin/catalog/${productId}`, {
+                                            method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                            body: JSON.stringify(payload)
+                                        });
+                                        if (res.ok) successCount++; else failCount++;
+                                    } 
+                                    else if (payload.title !== "") {
+                                        const res = await fetch(`${BASE_URL}/api/admin/catalog`, {
+                                            method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                                            body: JSON.stringify(payload)
+                                        });
+                                        if (res.ok) insertCount++; else failCount++;
+                                    }
+                                });
+
+                                await Promise.allSettled(uploadPromises);
+                                await new Promise(resolve => setTimeout(resolve, 50));
+                            }
 
                             document.getElementById('excelLoadingModal').classList.remove('active');
-                            showNotification("Laporan Excel Selesai", `${successCount} produk diperbarui, ${insertCount} produk baru ditambahkan, ${failCount} gagal.`, failCount > 0 ? "warning" : "success");
+                            document.getElementById('excelLoadingText').innerText = "Menjahit data ke Database. Mohon tunggu..."; 
+                            
+                            if (successCount > 0 || insertCount > 0) {
+                                showNotification("Upload Massal Sukses", `${successCount} produk diperbarui, ${insertCount} produk baru ditambahkan. ${failCount} gagal.`, failCount > 0 ? "warning" : "success");
+                            } else {
+                                showNotification("Upload Gagal", "Tidak ada data produk valid yang ditemukan di tab Excel tersebut.", "error");
+                            }
                             loadCatalog(); 
+
                         } catch (error) {
                             document.getElementById('excelLoadingModal').classList.remove('active');
-                            showNotification("Gagal Membaca Excel", "Pastikan Anda tidak mengubah judul baris teratas.", "error");
+                            document.getElementById('excelLoadingText').innerText = "Menjahit data ke Database. Mohon tunggu..."; 
+                            showNotification("Format Salah", "Pastikan Anda mengisi data di Tab '2. Upload_Produk' sesuai template.", "error");
+                        } finally {
+                            // MEMBUKA GEMBOK LAYAR
+                            isSystemBusy = false;
+                            document.body.style.pointerEvents = 'auto'; // Kembalikan fungsionalitas klik
                         }
                     };
                     reader.readAsArrayBuffer(file);
@@ -1061,24 +1111,18 @@
                         }
                     }
 
-                    statusTxt.innerHTML = '<i class="fas fa-user-secret text-slate-500"></i> Meminta otorisasi aman dari sistem...';
+                    statusTxt.innerHTML = '<i class="fas fa-user-secret text-slate-500"></i> Meminta otorisasi aman...';
                     btnSave.disabled = true; 
                     
                     try {
-                        // ==============================================================================================
-                        // 🔥 SECURITY PATCH: CLIENT-SIDE OBFUSCATION (ANTI-SCRAPER BOT GITHUB)
-                        // 🔥 PENTING: GANTI ARRAY DI BAWAH INI DENGAN API KEY IMGBB ANDA YANG SUDAH DIPECAH!
-                        // Contoh: Jika API Key ImgBB Anda adalah "1a2b3c4d5e6f7g8h9i0",
-                        // Maka pecah menjadi: ['1a2b3c', '4d5e6f', '7g8h9i0']
-                        // ==============================================================================================
                         const _0xKeyChunks = [
-                            '8b6016e', 
-                            'f63a42e', 
-                            'f8f724199f08', 
-                            '89d9a9'
+                            '8b6016ef', 
+                            '63a42ef8', 
+                            'f724199f', 
+                            '0889d9a9'
                         ];
                         const secureApiKey = _0xKeyChunks.join('');
-                        
+
                         statusTxt.innerHTML = `<i class="fas fa-spinner fa-spin text-blue-500"></i> Mengunggah ${files.length} foto serentak...`;
                         
                         const uploadPromises = files.map(async (file) => {
